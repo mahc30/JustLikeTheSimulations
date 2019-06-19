@@ -24,4 +24,6 @@ My plan for this night is make just a ball that moves from left to right and the
 
 The reason is that i'll be doing this by myself, me, only me and myself with help of myself *and the documentation of p5 and a ridiculous amount of stack overflow probably*
 
-So i just did it after probably 30 mins, better than i expected... when i was looking for how to make a circumference i found that CodingTrain-San has done this before but it's ok... I will act as i didn't know that to feel more original
+So i just did it after probably 30 mins, better than i expected... when i was looking for how to make a circumference i found that CodingTrain-San has done this before but it's ok... I will act as i didn't know that to feel more original.
+
+**News** I made it bounce because that would be nice to practice some physics too, i will think in *features* to add later.
