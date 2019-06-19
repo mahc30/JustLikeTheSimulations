@@ -4,11 +4,33 @@ var ma;
 var maxD;
 var labelText = "Z Position of light:";
 var z = 0;
+var r = 0;
+var g = 0;
+var b = 100;
 
-$("#slider").on('input change', function() {
-  z = document.getElementById("slider").value;
+/*Get Z position of light value
+from zlight*/
+$("#zlight").on('input change', function() {
+  z = document.getElementById("zlight").value;
   document.getElementById("label").innerText = labelText + z;
 });
+
+//Get R value from slider
+$("#R").on('input change', function() {
+  r = document.getElementById("R").value;
+  document.getElementById("label").innerText = labelText + r;
+});
+//Get G value from slider
+$("#G").on('input change', function() {
+  g = document.getElementById("G").value;
+  document.getElementById("label").innerText = labelText + g;
+});
+//Get B value from slider
+$("#B").on('input change', function() {
+  b = document.getElementById("B").value;
+  document.getElementById("label").innerText = labelText + b;
+});
+
 
 function setup() {
   createCanvas(screen.height/2, screen.height/2, WEBGL);
@@ -34,7 +56,7 @@ function draw() {
   var locX = mouseX - height / 2;
   var locY = (-1)*(mouseY - width / 2);
 
-  ambientLight(60, 60, 60);
+  ambientLight(r, g, b);
   pointLight(0, 0, angle*-10, locX, locY, z);
   
   for(z = 0; z < height; z += w){
