@@ -23,3 +23,5 @@ My plan for this night is make just a ball that moves from left to right and the
 ![Meme](https://i.kym-cdn.com/entries/icons/facebook/000/028/596/dsmGaKWMeHXe9QuJtq_ys30PNfTGnMsRuHuo_MUzGCg.jpg)
 
 The reason is that i'll be doing this by myself, me, only me and myself with help of myself *and the documentation of p5 and a ridiculous amount of stack overflow probably*
+
+So i just did it after probably 30 mins, better than i expected... when i was looking for how to make a circumference i found that CodingTrain-San has done this before but it's ok... I will act as i didn't know that to feel more original
