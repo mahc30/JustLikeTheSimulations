@@ -18,17 +18,17 @@ $("#zlight").on('input change', function() {
 //Get R value from slider
 $("#R").on('input change', function() {
   r = document.getElementById("R").value;
-  document.getElementById("label").innerText = labelText + r;
+  //document.getElementById("label").innerText = labelText + r;
 });
 //Get G value from slider
 $("#G").on('input change', function() {
   g = document.getElementById("G").value;
-  document.getElementById("label").innerText = labelText + g;
+  //document.getElementById("label").innerText = labelText + g;
 });
 //Get B value from slider
 $("#B").on('input change', function() {
   b = document.getElementById("B").value;
-  document.getElementById("label").innerText = labelText + b;
+  //document.getElementById("label").innerText = labelText + b;
 });
 
 
