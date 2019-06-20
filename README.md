@@ -27,3 +27,9 @@ The reason is that i'll be doing this by myself, me, only me and myself with hel
 So i just did it after probably 30 mins, better than i expected... when i was looking for how to make a circumference i found that CodingTrain-San has done this before but it's ok... I will act as i didn't know that to feel more original.
 
 **News** I made it bounce because that would be nice to practice some physics too, i will think in *features* to add later.
+
+**19/06/2019**
+I'm seeing it today and aw it look's beautiful <3
+k the the plan for today is... make it interactive, like, they float away from mouse, or change color when clicked or something, i'll see.
+
+As i start adding things i start to think that it would be easier to work with a circle object, but i'm already too deep into this, it would be like starting again. This could be an actual fun game lol.
