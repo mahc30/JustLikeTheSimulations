@@ -1,19 +1,13 @@
-var x_pos = 31;
-var y_pos = 300;
-const diameter = 60;
-var c_w = 600;
-var c_h = 600;
-var v_x = 2;
-var v_y = 0;
-var a = 0.1;
-var pressed_In_ball = false;
+var c_w = 400;
+var c_h = 500;
+
 var direction;
 var sq;
+var ball;
 
-//var angle = 0;
-//var y = 0;
 function setup() {
   createCanvas(c_w, c_h);
+  ball = new ball(31,200,60,3,0,0.1);
   sq = new square_obstacle(200, 300, 30);
 }
 
@@ -28,45 +22,30 @@ function draw() {
   sq.show();
 
   /*
-    Move The ball every frame in the direction of velocity
-    when it has been pressed and then released
-    Also changes fill of circle
+  Render Ball
   */
 
-  if (pressed_In_ball) {
-    fill(255);
-    Move(v_x, v_y);
-  } else {
-    fill(0);
-    Move(v_x, v_y);
-  }
-  //Drawing The Circle
-  ellipse(x_pos, y_pos, diameter);
-  stroke(255, 255, 255);
-  strokeWeight(3);
+  ball.update();
+  ball.show();
+
+
+  /*First check for collisions with canvas*/
 
   //Check for conditions to bounce left or right
-  if (x_pos >= c_w - (diameter / 2) || (x_pos <= (diameter / 2))) {
-    collision(true);
+  if (ball.x_pos >= c_w - (ball.diameter / 2) || (ball.x_pos <= (ball.diameter / 2))) {
+    ball.Collision(true);
   }
 
   //Check conditions to bounce when it touches the floor
-  if (y_pos >= c_h - (diameter / 2)) {
-    collision(false);
+  if (ball.y_pos >= c_h - (ball.diameter / 2)) {
+    ball.Collision(false);
   }
-
-  if(x_pos)
-
-  //Acceleration or gravity are always constant
-  v_y += a;
   
-  //y = map(sin(angle), -1, 1, 0 , 400);
-  //angle += 0.1;
-}
-
-function Move(v_x, v_y) {
-  x_pos += v_x;
-  y_pos += v_y;
+  /*Check for collisions with other objects*/
+  if(ball.Hit(sq)){
+    ball.Collision(true);
+    console.log("Ball Collision");
+  }
 }
 
 /*
@@ -78,47 +57,35 @@ a lo mejor lo puedo utilizar luego
 
 var count = 0;
 function mouseClicked() {
+
+  //Save actual v_x on Click
   if (count === 0) {
     count++;
-    direction = v_x;
+    direction = ball.v_x;
   }
 
   /* 
-  Checks the position of the mouse
-  when it is pressed, then:
-  if it is in the ball when pressed
-    stops it horizontally
-  else it is out of the ball when pressed
+    Checks the position of the mouse
+       when it is pressed, then:
+   if it is in the ball when pressed
+        stops it horizontally
+ else it is out of the ball when pressed
     continues in the same direction
   */
 
   //The next if actually gives me a square, but it is not that noticeable so i guess it doesn't matter for this simulation/game.
-  if (mouseX < x_pos + (diameter / 2) && mouseX > x_pos - (diameter / 2) && mouseY < y_pos + (diameter / 2) && mouseY > y_pos - (diameter / 2)) {
+  if (mouseX < ball.x_pos + (ball.diameter / 2) && mouseX > ball.x_pos - (ball.diameter / 2) && mouseY < ball.y_pos + (ball.diameter / 2) && mouseY > ball.y_pos - (ball.diameter / 2)) {
     console.log("click");
-    pressed_In_ball = true;
-    v_x = 0;
-    v_y = 0;
+    ball.pressed_In_ball = true;
+    ball.v_x = 0;
+    ball.v_y = 0;
   }
   else {
     console.log("Nope");
-    pressed_In_ball = false;
-    v_x = direction;
-    v_y += a;
+    ball.pressed_In_ball = false;
+    ball.v_x = direction;
+    ball.v_y += ball.a;
     count = 0;
   }
 }
 
-
-
-function collision(bool) {
-
-/*
-  True if collides horizontally
-  False if coillides Vertically
-*/
-
-  if (bool) {
-    return v_x *= -1;
-  }
-  return v_y *= -1;
-}
