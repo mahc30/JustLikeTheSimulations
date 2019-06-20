@@ -33,3 +33,5 @@ I'm seeing it today and aw it look's beautiful <3
 k the the plan for today is... make it interactive, like, they float away from mouse, or change color when clicked or something, i'll see.
 
 As i start adding things i start to think that it would be easier to work with a circle object, but i'm already too deep into this, it would be like starting again. This could be an actual fun game lol.
+
+I would describe this one as a practice of conditionals/math/physics practice, working with objects would be easier. I didn't think i would extend this so much and didn't really stop to think about how to optimally build it when i should have, welp...
