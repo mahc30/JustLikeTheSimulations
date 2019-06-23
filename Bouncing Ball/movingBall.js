@@ -2,13 +2,13 @@ var c_w = 400;
 var c_h = 500;
 
 var direction;
-var sq;
+var line_vertical_obs_1;
 var ball;
 
 function setup() {
   createCanvas(c_w, c_h);
   ball = new ball(31,200,60,3,0,0.1);
-  sq = new square_obstacle(200, 300, 30);
+  line_vertical_obs_1 = new line_obstacle(200, 200, 200,300);
 }
 
 function draw() {
@@ -18,8 +18,8 @@ function draw() {
   Render Square Obstacle
   */
 
-  sq.update();
-  sq.show();
+  line_vertical_obs_1.update();
+  line_vertical_obs_1.show();
 
   /*
   Render Ball
@@ -31,7 +31,7 @@ function draw() {
 
   /*First check for collisions with canvas*/
 
-  //Check for conditions to bounce left or right
+  //Check for conditions to bounce left or right for canvas
   if (ball.x_pos >= c_w - (ball.diameter / 2) || (ball.x_pos <= (ball.diameter / 2))) {
     ball.Collision(true);
   }
@@ -42,9 +42,8 @@ function draw() {
   }
   
   /*Check for collisions with other objects*/
-  if(ball.Hit(sq)){
+  if(line_vertical_obs_1.check_Collision(ball)){
     ball.Collision(true);
-    console.log("Ball Collision");
   }
 }
 

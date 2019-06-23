@@ -3,6 +3,7 @@ function ball(x_pos, y_pos, diameter, v_x, v_y, a) {
     this.x_pos = x_pos;
     this.y_pos = y_pos;
     this.diameter = diameter;
+    this.r = diameter/2;
     this.v_x = v_x;
     this.v_y = v_y;
     this.a = a;
@@ -52,25 +53,6 @@ function ball(x_pos, y_pos, diameter, v_x, v_y, a) {
         } else {
             this.v_y *= -1;
         }
-    }
-
-    this.Hit = function (other) {
-        this.r = this.diameter / 2;
-        //Checks if hit or not
-        if (this.x_pos + this.r > other.x &&
-            this.y_pos + this.r > other.y &&
-            this.x_pos - this.r < other.x + other.a &&
-            this.y_pos - this.r < other.y + other.a) {
-            //If yes, check for side
-            if (this.x_pos + this.r >= other.x && this.x_pos - this.r <= other.x + a) {
-                this.Collision(true);
-            }
-            else if (this.y_pos - this.r <= other.y + other.a && this.y_pos + this.r >= other.y) {
-                this.Collision(false);
-            }
-        }
-
-
     }
 }
 
