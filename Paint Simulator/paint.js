@@ -5,6 +5,7 @@ var clickOn = false;
 var lineclickOn = false;
 var quadclickOn = false;
 var placeholder;
+var mousePositions = [0,0,300,300,200,200,100,100]
 
 function setup() {
     createCanvas(width, height);
@@ -75,19 +76,18 @@ $("#Create_Line_Btn").click(function (e) {
 
 $("#Create_Quad_Btn").click(function (e) {
     e.preventDefault();
-    cont = 5;
-    placeholder = new fquad(mousePositions[cont-5],mousePositions[cont-4],mousePositions[cont-3],mousePositions[cont-2],mousePositions[cont-1],mousePositions[cont],mouseX, mouseY);
+    placeholder = new fquad(mousePositions[0],mousePositions[1],mousePositions[2],mousePositions[3],mousePositions[4],mousePositions[5],mouseX, mouseY);
     quadclickOn = true;
 });
 
-var mousePositions = [0,0,100,100,200,200,150,150];
+
 var cont = 0;
 function mousePressed() {
     mousePositions[cont] = mouseX;
     cont+=1;
     mousePositions[cont] = mouseY;
     cont += 1;
-    if(cont >= 6){
+    if(cont >= 9){
         cont = 0;
     }
 }
