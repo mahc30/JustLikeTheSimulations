@@ -4,21 +4,34 @@ var figures = [];
 var clickOn = false;
 var lineclickOn = false;
 var quadclickOn = false;
+var triangleclickOn = false;
 var placeholder;
-var mousePositions = [0,0,300,300,200,200,100,100]
+var mousePositions;
+var cont = 0;
 
 function setup() {
     createCanvas(width, height);
+    mousePositions = [10,10,300,300,200,200,100,100];
 }
 
 function draw() {
     background(0);
-    drawPoints();
+    fill(255);
+    stroke(255);
+    point(mousePositions[0], mousePositions[1]);
+    point(mousePositions[2], mousePositions[3]);
+    point(mousePositions[4], mousePositions[5]);
 
     for (let i = 0; i < figures.length; i++) {
         figures[i].show();
     }
 
+    /*
+    Gotta check for what kind of figure is being created
+    so i can create a different placeholder and then push
+    it into the array that draws everything
+    */
+   
     if (clickOn) {
         placeholder.x = mouseX;
         placeholder.y = mouseY;
@@ -46,15 +59,28 @@ function draw() {
 
     }
 
-    if ((clickOn || lineclickOn || quadclickOn) && mouseIsPressed) {
+    if(triangleclickOn){
+        placeholder.x1 = mousePositions[0];
+        placeholder.y1 = mousePositions[1];
+        placeholder.x2 = mousePositions[2];
+        placeholder.y2 = mousePositions[3];
+        placeholder.x3 = mousePositions[4];
+        placeholder.y3 = mousePositions[5];
+        placeholder.show();
+    }
+
+    if ((clickOn || lineclickOn || quadclickOn || triangleclickOn) && mouseIsPressed) {
         figures.push(placeholder);
         clickOn = false;
         lineclickOn = false;
         quadclickOn = false;
+        triangleclickOn = false;
         placeholder = null;
         cont = 0;
     }
 }
+
+//Getting buttons Input
 
 $("#Create_Square_Btn").click(function (e) {
     e.preventDefault();
@@ -80,8 +106,19 @@ $("#Create_Quad_Btn").click(function (e) {
     quadclickOn = true;
 });
 
+$("#Create_Triangle_Btn").click(function (e) {
+    e.preventDefault();
+    placeholder = new ptriangle(mousePositions[0],mousePositions[1],mousePositions[2],mousePositions[3],mousePositions[4],mousePositions[5]);
+    triangleclickOn = true;
+});
 
-var cont = 0;
+$("#Delete_Last_Figure").click(function (e) {
+    e.preventDefault();
+    figures.pop();
+});
+//Whenever mouse is pressed, position is saved, it's a bit buggy but
+//the 3 dots make it easier
+
 function mousePressed() {
     mousePositions[cont] = mouseX;
     cont+=1;
@@ -90,11 +127,4 @@ function mousePressed() {
     if(cont >= 9){
         cont = 0;
     }
-}
-
-function drawPoints(){
-    fill(255);
-    point(mousePositions[0], mousePositions[1]);
-    point(mousePositions[2], mousePositions[3]);
-    point(mousePositions[4], mousePositions[5]);
 }

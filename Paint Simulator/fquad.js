@@ -11,8 +11,6 @@ class fquad {
     }
 
     show(){
-        stroke(255);
-        fill(255);
         quad(this.x1, this.y1, this.x2, this.y2, this.x3, this.y3, this.x4, this.y4);
     }
 }
