@@ -38,3 +38,6 @@ I would describe this one as a practice of conditionals/math/physics practice, w
 
 **23/06/2019**
 Found the [Jeffrey Thompson Collision Detection Book](http://www.jeffreythompson.org/collision-detection/line-circle.php) and made the ball able to collide with lines. It was fun i think i'll leave this *Movin Ball* for some time and do different stuff.
+
+**25/06/2019**
+I'm doing an engine or something like that, nothing special, it's just that you can add figures to the Canvas by pressing a button of the respective figure.
