@@ -1,5 +1,5 @@
-const width = 600;
-const height = 400;
+const width = document.getElementById("painS").offsetWidth;
+const height = document.getElementById("painS").offsetHeight+100;
 var figures = [];
 var clickOn = false;
 var lineclickOn = false;
@@ -12,7 +12,7 @@ var canvas;
 
 function setup() {
     canvas = createCanvas(width, height);
-    canvas.parent('paint');
+    canvas.parent('painS');
     mousePositions = [10,10,300,300,200,200,100,100];
 }
 

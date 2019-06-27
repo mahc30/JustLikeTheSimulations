@@ -1,12 +1,15 @@
-var c_w = 400;
-var c_h = 500;
+var c_w = document.getElementById("bouncinS").offsetWidth;
+var c_h = document.getElementById("bouncinS").offsetHeight + 100;
 
 var direction;
 var line_vertical_obs_1;
 var ball;
 
+var canvas;
+
 function setup() {
-  createCanvas(c_w, c_h);
+  canvas = createCanvas(c_w, c_h);
+  canvas.parent('bouncinS');
   ball = new ball(31,200,60,3,0,0.1);
   line_vertical_obs_1 = new line_obstacle(200, 200, 200,300);
 }

@@ -41,3 +41,13 @@ Found the [Jeffrey Thompson Collision Detection Book](http://www.jeffreythompson
 
 **25/06/2019**
 I'm doing an engine or something like that, nothing special, it's just that you can add figures to the Canvas by pressing a button of the respective figure.
+
+**26/06/2019**
+I have three different memes so i think it's time to merge it all togheter so it's one, not two or three, but one, one index to rule 'em all.
+
+#Behold
+![meme](https://vignette.wikia.nocookie.net/fairlyoddparents/images/8/84/ShelfLife240.png/revision/latest?cb=20110307232622&path-prefix=en)
+
+##Frankenstein (The Index)
+
+So it seems like i have to use something called "iframes" to build my Frankenstein (Not the doctor), but that's a problem for tomorrow
