@@ -8,9 +8,11 @@ var triangleclickOn = false;
 var placeholder;
 var mousePositions;
 var cont = 0;
+var canvas;
 
 function setup() {
-    createCanvas(width, height);
+    canvas = createCanvas(width, height);
+    canvas.parent('paint');
     mousePositions = [10,10,300,300,200,200,100,100];
 }
 

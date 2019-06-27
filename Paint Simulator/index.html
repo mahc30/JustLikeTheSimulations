@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,15 +11,17 @@
 
     <title>Pain Simulator</title>
 </head>
-<body>
-    <button id="Create_Square_Btn" style ="position: fixed; left: 40%;">Square</button>
-    <button id="Create_Circle_Btn" style ="position: fixed; left: 40%; top: 10%;">Circle</button>
-    <button id="Create_Line_Btn" style ="position: fixed; left: 40%; top: 20%;">Line</button>
-    <button id="Create_Quad_Btn" style ="position: fixed; left: 40%; top: 30%;">Quad</button>
-    <button id="Create_Triangle_Btn" style ="position: fixed; left: 40%; top: 40%;">Triangle</button>
-    <button id="Delete_Last_Figure" style ="position: fixed; left: 40%; top: 50%;">Undo</button>
 
-    
+<body>
+    <div id="paint" style=""></div>
+    <div style="border:solid 3px black; height: 100%; width: 30%; text-align: center; position: relative; left: 50px; padding: 5px;"> 
+        <button id="Create_Square_Btn" style="">Square</button>
+        <button id="Create_Circle_Btn" style=" ">Circle</button>
+        <button id="Create_Line_Btn" style=" ">Line</button>
+        <button id="Create_Quad_Btn" style=" ">Quad</button>
+        <button id="Create_Triangle_Btn" style=" ">Triangle</button>
+        <button id="Delete_Last_Figure" style=" ">Undo</button>
+    </div>
 </body>
 <script src="paint.js"></script>
 <script src="square.js"></script>
