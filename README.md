@@ -51,3 +51,8 @@ I have three different memes so i think it's time to merge it all togheter so it
 ##Frankenstein (The Index)
 
 So it seems like i have to use something called "iframes" to build my Frankenstein (Not the doctor), but that's a problem for tomorrow
+
+**9/07/2019**
+The problem for tomorrow evolved into a problem for undefined, but today is undefined, and i have succesfully assembled my own Frankenstein (The book) and it's heavy for browsers already lol
+
+_~Forgot to update README~_ :L
