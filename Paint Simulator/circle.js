@@ -1,11 +1,12 @@
 class circle{
-    constructor (x,y,r){
+    constructor (obj,x,y,r){
+    this.obj = obj;
     this.x = x;
     this.y = y;
     this.r = r/2;
     }
 
     show(){
-        ellipse(this.x,this.y,this.r*2);
+        this.obj.ellipse(this.x,this.y,this.r*2);
     }
 }

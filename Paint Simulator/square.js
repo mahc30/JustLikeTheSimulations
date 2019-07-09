@@ -1,11 +1,12 @@
 class square {
-    constructor(x, y, s) {
+    constructor(obj,x, y, s) {
+        this.obj = obj;
         this.s = s;
         this.x = x;
         this.y = y
     }
 
     show() {
-        rect(this.x, this.y, this.s, this.s);
+        this.obj.rect(this.x, this.y, this.s, this.s);
     }
 }

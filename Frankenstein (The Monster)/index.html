@@ -25,9 +25,10 @@
                     <button id="Create_Quad_Btn">Quad</button>
                     <button id="Create_Triangle_Btn">Triangle</button>
                     <button id="Delete_Last_Figure">Undo</button>
+                    <p1>Pain Simulator</p1>
                 </div>
 
-                <p1>Pain Simulator</p1>
+                
 
             </div>
             <!-- Here rests Bouncin' Ball -->
@@ -35,23 +36,46 @@
                 <div id="bouncinS"></div>
             </div>
             <!-- Here rests Cube Waves by Bees and Bombs -->
-            <div id="beess" class="box">c</div>
+            <div class="box">
+                <div id="beess"></div>
+                <div id="attributes">
+                    <li style="list-style: none; text-align: center">
+                        <ol>
+                            <label id="label" for="slider"> Z Position of light:</label>
+                            <input id="zlight" type="range" min="-100" max="100" value="0" step="1" name="slider">
+                        </ol>
+                        <ol>
+                            <label id="label" for="slider">R</label>
+                            <input id="R" type="range" min="0" max="255" value="0" step="1" name="slider">
+                        </ol>
+                        <label id="label" for="slider">G</label>
+                        <input id="G" type="range" min="0" max="255" value="0" step="1" name="slider">
+                        <ol>
+                            <label id="label" for="slider">B</label>
+                            <input id="B" type="range" min="0" max="255" value="150" step="1" name="slider">
+                        </ol>
+                    </li>
+                </div>
+            </div>
         </div>
     </div>
 
 </body>
 <link rel="stylesheet" href="style.css">
+<script src="./frankenstein.js"></script>
 <!-- Pain Simulator Scripts -->
-<script src="../Paint Simulator/paint.js"></script>
 <script src="../Paint Simulator/square.js"></script>
 <script src="../Paint Simulator/circle.js"></script>
 <script src="../Paint Simulator/pline.js"></script>
 <script src="../Paint Simulator/fquad.js"></script>
 <script src="../Paint Simulator/ptriangle.js"></script>
 
-<!-- Bouncing Ball Scripts-->
+<!-- Bouncing Ball Scripts 
+<script src="../Bouncing Ball/line_obstacle.js"></script>
+-->
 <script src="../Bouncing Ball/ball.js"></script>
-<script src="../Bouncing Ball/line.js"></script>
-<script src="../Bouncing Ball/movingBall.js"></script>
+
+<!-- Cuve Waves By Bees and Bombs -->
+
 
 </html>

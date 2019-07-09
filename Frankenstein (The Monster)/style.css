@@ -19,6 +19,7 @@ body, html {
 
 .painSButtons{
     position: relative;
+    bottom: 9%;
     right: 10%;
     text-align: center;
 }
@@ -43,6 +44,6 @@ body, html {
 }
 
 .box{
-    border: solid 3px black;
-    font-size: 3em;
+    border: solid 3px peru;
+    font-size:2em;
 }

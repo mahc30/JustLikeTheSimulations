@@ -1,5 +1,6 @@
 class pline {
-    constructor(x1, y1, x2, y2) {
+    constructor(obj, x1, y1, x2, y2) {
+        this.obj = obj;
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
@@ -7,6 +8,6 @@ class pline {
     }
 
     show() {
-        line(this.x1, this.y1, this.x2, this.y2);
+        this.obj.line(this.x1, this.y1, this.x2, this.y2);
     }
 }
