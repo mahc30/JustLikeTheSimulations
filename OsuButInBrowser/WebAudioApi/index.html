@@ -8,19 +8,12 @@
 </head>
 
 <body>
-    <h1>ola?</h1>
-    <audio src="../sounds/stm.mp3"></audio>
-    <button data-playing="false" role="switch" aria-checked="false">
-        <span>Play/Pause</span>
-    </button>
-
+    <input id="audio_file" type="file" accept="audio/*" />
+    <audio id="audio_player" />
 </body>
 
 <style>
-    input {
-        position: relative;
-        top: 530px;
-    }
+
 </style>
 <script src="./app.js"></script>
 
