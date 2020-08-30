@@ -11,7 +11,7 @@ var screenHeigth = screen.height / 2;
 var debugCount = 0;
 
 function preload() {
-    song = loadSound('../sounds/test.mp3');
+    song = loadSound('../sounds/stm.mp3');
 }
 
 function toggleSong() {
@@ -47,7 +47,6 @@ function draw() {
 
     if (volHist.length > screenWidth) {
         volHist.splice(0, 1);
-        beatHist.splice(0, 1);
     }
 }
 
