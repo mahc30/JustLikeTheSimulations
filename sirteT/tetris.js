@@ -6,6 +6,7 @@ let height;
 const BACKGROUND_COLOR = 0
 const BOARD_BORDER_COLOR = "#FFFFFF"
 const BOARD_GRID_COLOR = "GRAY"
+const COLORS = ["CYAN", "ORANGE", "BLUE", "RED", "GREEN", "PURPLE", "YELLOW"]
 
 //Tetris rules
 const NUM_COLUMNS = 10;
@@ -13,7 +14,6 @@ const NUM_ROWS = 20;
 const TETROMINO_START_POSITION = 6;
 const GRID_EMPTY_VALUE = -2;
 const GRID_CURRENT_TETROMINO_VALUE = -2;
-const GRID_TRASH_TETROMINO_VALUE = -1;
 
 const TETROMINO_MATRIX_DIMENSIONS = 4;
 
@@ -34,32 +34,32 @@ LEGEND
 const I = {
     color: "CYAN",
     shape_options:
-    [
-    [4,5,6,7],
-    [1, 5, 9, 13],
-    [8,9,10,11],
-    [2,6,10,14],
-    ],
+        [
+            [4, 5, 6, 7],
+            [1, 5, 9, 13],
+            [8, 9, 10, 11],
+            [2, 6, 10, 14],
+        ],
 }
 
 
 const J = {
     shape_options: [
-        [5,9,10,11],
-        [1,2,6,10],
-        [10,6,5,4],
-        [1, 2, 5, 9],
+        [5, 9, 10, 11],
+        [5, 6, 10, 14],
+        [6, 10, 4, 5],
+        [7, 6, 10, 14],
     ],
     color: "ORANGE"
 }
 
 const L = {
     shape_options: [
-        [9,5,6,7],
-        [1,5,9, 10],
-        [8,9,10,6],
+        [9, 5, 6, 7],
+        [1, 5, 9, 10],
+        [8, 9, 10, 6],
         [9, 10, 6, 2],
-        ],
+    ],
     color: "BLUE"
 }
 
@@ -75,39 +75,30 @@ const O = {
 
 const S = {
     shape_options: [
+        [13, 9, 10, 6],
         [6, 7, 9, 10],
-        [13,9,10,6],
+        [14, 10, 11, 7],
         [11, 10, 14, 13],
-        [14,10,11,7],
     ],
     color: "RED"
 }
 
 const Z = {
     shape_options: [
-        [5,9,10,14],
-        [9,10,14,15],
-        [1,5,6,10],
+        [5, 9, 10, 14],
+        [9, 10, 14, 15],
+        [1, 5, 6, 10],
         [5, 6, 10, 11],
     ],
     color: "GREEN"
 }
 
-
-/*
-LEGEND
-| 0 | 4 | 8 | 12 |
-| 1 | 5 | 9 | 13 |
-| 2 | 6 |10 | 14 |
-| 3 | 7 |11 | 15 |
-*/
-
 const T = {
     shape_options: [
-        [6,10,9,14],
+        [6, 10, 9, 14],
         [9, 10, 11, 14],
-        [6,10,11,14],
-        [9,10,6,11],
+        [6, 10, 11, 14],
+        [9, 10, 6, 11],
     ],
     color: "PURPLE"
 }
@@ -116,6 +107,7 @@ const figures = [I, O, S, Z, L, J, T]
 
 //Game State
 let board;
+let tetromino_queue = [];
 let current_tetromino;
 
 //Others
@@ -171,7 +163,8 @@ const sketch = (s) => {
             this.grid[i] = new Array(NUM_ROWS).fill(GRID_EMPTY_VALUE)
         }
 
-        current_tetromino = Tetromino.new_tetromino()
+        Tetromino.setup_queue();
+        Tetromino.update_current_tetromino();
     }
 
     Tetris_Board.prototype.draw = function () {
@@ -191,11 +184,13 @@ const sketch = (s) => {
             s.line(this.x, this.y + (rows_height * i), this.w, this.y + (rows_height * i));
         }
 
-
+        /*
         for (let i = 0; i < this.trash.length; i++) {
             this.trash[i].draw()
         }
-
+*/
+        this.draw_trash();
+        this.check_fast_drop();
         current_tetromino.draw();
     }
 
@@ -208,6 +203,10 @@ const sketch = (s) => {
             this.create_trash()
             current_tetromino = Tetromino.new_tetromino()
             //Check for complete rows
+            let full_rows = this.check_full_row()
+            if (full_rows.length > 0) {
+                this.delete_rows(full_rows);
+            }
             //todo
         }
     }
@@ -284,8 +283,7 @@ const sketch = (s) => {
     Tetris_Board.prototype.will_collision_rotate_right = function () {
 
         let next_rotation = current_tetromino.rotation;
-        next_rotation === 3? next_rotation = 0 : next_rotation++;
-        console.log(next_rotation)
+        next_rotation === 3 ? next_rotation = 0 : next_rotation++;
 
         let next_shape = current_tetromino.shape_options[next_rotation];
 
@@ -300,6 +298,39 @@ const sketch = (s) => {
                         let relative_offset_x = current_tetromino.x + i;
                         let relative_offset_y = current_tetromino.y + j + 1;
                         if (relative_offset_y >= NUM_ROWS) return true  //Out of bounds
+                        if (relative_offset_x >= NUM_COLUMNS || relative_offset_x < 0) return true  //Out of bounds
+
+                        let nextBlockDown = this.grid[relative_offset_x][relative_offset_y];
+                        if (
+                            nextBlockDown != GRID_EMPTY_VALUE //Hay basura 
+                        ) return true;
+
+                    }
+                }
+            }
+        }
+
+    }
+
+    Tetris_Board.prototype.will_collision_rotate_left = function () {
+
+        let next_rotation = current_tetromino.rotation;
+        next_rotation === 0 ? next_rotation = 3 : next_rotation--;
+
+        let next_shape = current_tetromino.shape_options[next_rotation];
+
+        let p;
+
+        for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
+            for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
+                p = i * TETROMINO_MATRIX_DIMENSIONS + j
+                for (k = 0; k < current_tetromino.shape.length; k++) {
+                    if (p === next_shape[k]) {
+                        //Si esta posición es parte de una figura
+                        let relative_offset_x = current_tetromino.x + i;
+                        let relative_offset_y = current_tetromino.y + j + 1;
+                        if (relative_offset_y >= NUM_ROWS) return true  //Out of bounds
+                        if (relative_offset_x >= NUM_COLUMNS || relative_offset_x < 0) return true  //Out of bounds
 
                         let nextBlockDown = this.grid[relative_offset_x][relative_offset_y];
                         if (
@@ -325,11 +356,59 @@ const sketch = (s) => {
                         let y_offset = current_tetromino.y + j;
                         if (x_offset < 0) x_offset = 0;
                         if (y_offset >= NUM_ROWS) y_offset = NUM_ROWS - 1;
-                        this.grid[x_offset][y_offset] = GRID_TRASH_TETROMINO_VALUE
-                        this.trash.push(current_tetromino)
+                        this.grid[x_offset][y_offset] = current_tetromino.color
+                        //this.trash.push(current_tetromino)
                     }
                 }
             }
+        }
+    }
+
+    Tetris_Board.prototype.draw_trash = function () {
+        for (let i = 0; i < this.grid.length; i++) {
+            for (let j = 0; j < this.grid[0].length; j++) {
+                if (this.grid[i][j] === GRID_EMPTY_VALUE) continue;
+                s.fill(this.grid[i][j]);
+                s.rect(cols_width * i, rows_height * j, cols_width, rows_height)
+            }
+        }
+    }
+
+    Tetris_Board.prototype.check_full_row = function () {
+        let full_rows = [];
+        for (let j = 0; j < this.grid[0].length; j++) { // Rows
+            let full = true;
+            for (let i = 0; i < this.grid.length; i++) { //Columns
+                if (this.grid[i][j] === GRID_EMPTY_VALUE) {
+                    full = false;
+                    break;
+                }
+            }
+
+            if (full) full_rows.push(j)
+        }
+
+        return full_rows;
+    }
+
+    Tetris_Board.prototype.delete_rows = function (row_indexes) {
+        //Will delete from top to bottom so rows must be sorted
+        row_indexes.sort(function (a, b) { return b - a });
+        let next_row;
+        while (row_indexes.length > 0) {
+            next_row = row_indexes.pop();
+            for (let i = next_row; i >= 1; i--) {
+                for (let j = 0; j < NUM_COLUMNS; j++) {
+                    this.grid[j][i] = this.grid[j][i - 1];
+                }
+            }
+        }
+    }
+
+    Tetris_Board.prototype.check_fast_drop = function () {
+        if (s.keyIsDown(s.DOWN_ARROW)) {
+            if (board.will_collision_down()) return
+            current_tetromino.move_down();
         }
     }
 
@@ -359,7 +438,6 @@ const sketch = (s) => {
         }
     }
 
-
     Tetromino.prototype.move_down = function () {
         this.y++;
     }
@@ -372,14 +450,26 @@ const sketch = (s) => {
         this.x++;
     }
 
-    Tetromino.prototype.rotate_90_right = function() {
-        
-            if(this.rotation === 3){
-                this.rotation = 0;
-            }
-            else{
-                this.rotation++;
-            }
+    Tetromino.prototype.rotate_90_right = function () {
+
+        if (this.rotation === 3) {
+            this.rotation = 0;
+        }
+        else {
+            this.rotation++;
+        }
+
+        this.shape = this.shape_options[this.rotation]
+    }
+
+    Tetromino.prototype.rotate_90_left = function () {
+
+        if (this.rotation === 0) {
+            this.rotation = 3;
+        }
+        else {
+            this.rotation--;
+        }
 
         this.shape = this.shape_options[this.rotation]
     }
@@ -391,6 +481,17 @@ const sketch = (s) => {
 
     Tetromino.trash_tetromino = () => {
         return new Tetromino(current_tetromino.x, current_tetromino.y, current_tetromino.shape_options[current_tetromino.rotation], current_tetromino.color)
+    }
+
+    Tetromino.setup_queue = () => {
+        for (let i = 0; i < 4; i++) {
+            tetromino_queue.push(Tetromino.new_tetromino())
+        }
+    }
+
+    Tetromino.update_current_tetromino = () => {
+        current_tetromino = tetromino_queue.splice(0, 1)[0];
+        tetromino_queue.push(Tetromino.new_tetromino())
     }
 
     s.keyPressed = () => {
@@ -408,8 +509,12 @@ const sketch = (s) => {
                 current_tetromino.move_down();
                 break;
             case 69: //E
-                if(board.will_collision_rotate_right())break;
+                if (board.will_collision_rotate_right()) break;
                 current_tetromino.rotate_90_right();
+                break;
+            case 81: //E
+                if (board.will_collision_rotate_left()) break;
+                current_tetromino.rotate_90_left();
                 break;
 
             default:
