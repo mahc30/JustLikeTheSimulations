@@ -135,9 +135,6 @@ const sketch = (s) => {
         let canvas = s.createCanvas(width, height);
         canvas.parent("tetris_viewport");
 
-        let div = document.getElementById("game_board");
-        div.style.display = "none";
-
         //Mobile Ver
         if (height > width)
             cols_width = (width * 2 / 3) / NUM_COLUMNS; //Divide 2/3 of screen by number of cols
