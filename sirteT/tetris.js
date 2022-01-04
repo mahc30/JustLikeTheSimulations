@@ -3,9 +3,21 @@ let width;
 let height;
 
 //Styles
-const BACKGROUND_COLOR = 0
-const BOARD_BORDER_COLOR = "#FFFFFF"
-const BOARD_GRID_COLOR = "GRAY"
+const COLORS =
+    [{ "name": "Pale Spring Bud", "hex": "#E6E8B1", "light": "#eeefc8", "dark":"#8a8b6a"}, // Beach
+    { "name": "Wisteria", "hex": "#BA9EDC"  , "light": "#c1a8e0", "dark":"#826f9a"}, //Light Purple
+    { "name": "Radical Red", "hex": "#FD3F60" , "light": "#fd5270", "dark":"#b12c43" }, //Red
+    { "name": "Star Command Blue", "hex": "#117EBE" , "light": "#298bc5", "dark":"#0c5885" }, //Blue
+    { "name": "Sky Blue Crayola", "hex": "#10b2da" , "light": "#58c9e5", "dark":"#0b7d99" }, // Light Blue
+    { "name": "Orange", "hex": "#ff6205"  , "light": "#ff8137", "dark":"#b34504" }, //Orange
+    { "name": "Green", "hex": "#60FD3F"  , "light": "#80fd65", "dark":"#3a9826" }, //Green
+    { "name": "Complementary Beach", "hex": "#B1E8CF", "light": "#c1edd9", "dark":"#7ca291"}, //Complementary Beach
+];
+    
+
+const BACKGROUND_COLOR = COLORS[7].light;
+const BORDER_COLOR = COLORS[7].dark;
+const BOARD_GRID_COLOR = COLORS[7].dark;
 
 //Tetris rules
 const NUM_COLUMNS = 10;
@@ -17,7 +29,6 @@ const TETROMINO_MATRIX_DIMENSIONS = 4;
 //Gameplay Options
 let tick_interval = 1000;
 
-
 /*
 LEGEND
 | 0 | 4 | 8 | 12 |
@@ -27,7 +38,7 @@ LEGEND
 */
 
 const I = {
-    color: "CYAN",
+    color: 4,
     shape_options:
         [
             [8, 9, 10, 11],
@@ -44,7 +55,7 @@ const J = {
         [6, 5, 9, 13],
         [4, 8, 9, 10],
     ],
-    color: "ORANGE"
+    color: 5
 }
 
 const L = {
@@ -54,17 +65,17 @@ const L = {
         [5, 9, 13, 14],
         [8, 9, 10, 6],
     ],
-    color: "BLUE"
+    color: 3
 }
 
 const O = {
     shape_options: [
-        [8, 12, 9, 13],
-        [8, 12, 9, 13],
-        [8, 12, 9, 13],
-        [8, 12, 9, 13]
+        [5, 9, 4, 8],
+        [5, 9, 4, 8],
+        [5, 9, 4, 8],
+        [5, 9, 4, 8],
     ],
-    color: "YELLOW"
+    color: 0
 }
 
 const S = {
@@ -74,7 +85,7 @@ const S = {
         [14, 10, 11, 7],
         [11, 10, 14, 13],
     ],
-    color: "RED"
+    color: 2
 }
 
 const Z = {
@@ -84,7 +95,7 @@ const Z = {
         [4, 8, 9, 13],
         [5, 6, 10, 11],
     ],
-    color: "GREEN"
+    color: 6
 }
 
 const T = {
@@ -94,7 +105,7 @@ const T = {
         [5, 9, 10, 13],
         [8, 9, 10, 5],
     ],
-    color: "PURPLE"
+    color: 1
 }
 
 const figures = [I, O, S, Z, L, J, T]
@@ -127,10 +138,9 @@ const sketch = (s) => {
         let div = document.getElementById("game_board");
         div.style.display = "none";
 
-        let adapt_height;
         //Mobile Ver
-        if(height > width)
-            cols_width = (width * 2/3) / NUM_COLUMNS ; //Divide 2/3 of screen by number of cols
+        if (height > width)
+            cols_width = (width * 2 / 3) / NUM_COLUMNS; //Divide 2/3 of screen by number of cols
         else
             cols_width = height / NUM_ROWS
 
@@ -145,7 +155,7 @@ const sketch = (s) => {
         board = new Tetris_Board(1, 0, board_w, board_h); //Value 1 is Padding so it doesn't clip on left border
         status_bar = new Status_Bar(status_bar_x, 0, status_bar_w, board_h);
 
-        s.resizeCanvas(width, board_h)
+        s.resizeCanvas(board_w + status_bar_w, board_h)
     }
 
     setInterval(() => {
@@ -153,7 +163,7 @@ const sketch = (s) => {
     }, tick_interval);
 
     s.draw = () => {
-        s.background(0)
+        s.background(BACKGROUND_COLOR)
         board.draw()
         status_bar.draw()
     }
@@ -175,14 +185,14 @@ const sketch = (s) => {
     }
 
     Tetris_Board.prototype.draw = function () {
-        s.stroke(BOARD_BORDER_COLOR)
-        s.fill(BACKGROUND_COLOR)
+        s.stroke(BORDER_COLOR)
 
         //Borders
         s.rect(this.x, this.y, this.x + this.w, this.y + this.h)
 
         //Grid
         s.stroke(BOARD_GRID_COLOR)
+        s.strokeWeight(1)
         for (let i = 0; i < NUM_COLUMNS; i++) {
             s.line(this.x + (cols_width * i), this.y, this.x + (cols_width * i), this.h);
         }
@@ -331,7 +341,7 @@ const sketch = (s) => {
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                 p = i * TETROMINO_MATRIX_DIMENSIONS + j
-                for (let  k = 0; k < current_tetromino.shape.length; k++) {
+                for (let k = 0; k < current_tetromino.shape.length; k++) {
                     if (p === next_shape[k]) {
                         //Si esta posición es parte de una figura
                         let relative_offset_x = current_tetromino.x + i;
@@ -356,7 +366,7 @@ const sketch = (s) => {
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                 p = i * TETROMINO_MATRIX_DIMENSIONS + j
-                for (let  k = 0; k < current_tetromino.shape.length; k++) {
+                for (let k = 0; k < current_tetromino.shape.length; k++) {
                     if (p === current_tetromino.shape[k]) {
                         //Si esta posición es parte de una figura
                         let x_offset = current_tetromino.x + i;
@@ -373,10 +383,12 @@ const sketch = (s) => {
     }
 
     Tetris_Board.prototype.draw_trash = function () {
+        s.strokeWeight(2)
         for (let i = 0; i < this.grid.length; i++) {
             for (let j = 0; j < this.grid[0].length; j++) {
                 if (this.grid[i][j] === GRID_EMPTY_VALUE) continue;
-                s.fill(this.grid[i][j]);
+                s.fill(COLORS[this.grid[i][j]].light);
+                s.stroke(COLORS[this.grid[i][j]].dark)
                 s.rect(cols_width * i, rows_height * j, cols_width, rows_height)
             }
         }
@@ -441,9 +453,9 @@ const sketch = (s) => {
     }
 
     Tetromino.prototype.draw = function () {
-        s.fill(this.color)
-        s.stroke("PINK");
-        s.strokeWeight(3)
+        s.fill(COLORS[this.color].hex)
+        s.stroke(COLORS[this.color].dark);
+        s.strokeWeight(1)
 
         let p;
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
@@ -517,7 +529,7 @@ const sketch = (s) => {
 
     Tetromino.hold = () => {
         can_swap_hold = false;
-        if(!tetromino_hold){
+        if (!tetromino_hold) {
             tetromino_hold = current_tetromino;
             Tetromino.update_current_tetromino()
             return;
@@ -555,9 +567,9 @@ const sketch = (s) => {
                 if (board.will_collision_rotate_left()) break;
                 current_tetromino.rotate_90_left();
                 break;
-                case 16: //Shift
-                if(!can_swap_hold) break;
-                    Tetromino.hold()
+            case 16: //Shift
+                if (!can_swap_hold) break;
+                Tetromino.hold()
                 break;
 
             default:
@@ -574,6 +586,8 @@ const sketch = (s) => {
 
     Status_Bar.prototype.draw = function () {
         s.noFill()
+        s.stroke(BORDER_COLOR);
+        s.strokeWeight(2);
         s.rect(this.x, this.y, this.w, this.h) //Border
 
         this.display_queue()
@@ -587,13 +601,13 @@ const sketch = (s) => {
         let tetromino_cell_w = container_w / 4 - 4;
         let container_h = tetromino_cell_w * 22;
 
-        s.stroke("WHITE");
-        s.strokeWeight(3);
         s.rect(container_x, container_y, container_w, container_h)
 
         //Custom Draw for tetrominos so they fit in status bar without messing with game logic
         tetromino_queue.forEach((t, z) => {
-            s.fill(t.color)
+            s.fill(COLORS[t.color].hex)
+            s.stroke(COLORS[t.color].dark)
+
             let p;
             for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
                 for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
@@ -601,8 +615,14 @@ const sketch = (s) => {
 
                     for (let k = 0; k < t.shape.length; k++) {
                         if (p === t.shape[k]) {
-                            //Don't expect to understand this
-                            s.rect(container_x + tetromino_cell_w * i, container_h / 22 + (container_y + 5 * z * tetromino_cell_w) + (tetromino_cell_w * j), tetromino_cell_w, tetromino_cell_w)
+                            /*
+                                Y Explanation: Container_y = relative to status bar
+                                + container_h / 22 = padding top
+                                + 5 * z * tetromino_cell_w = padding top the size of 5 tetromino cells for every tetromino
+                                + tetromino_cell_w * j = square on every cell where tetromino should be vertical-wise 
+
+                            */
+                            s.rect(container_x + tetromino_cell_w * i, container_y + container_h / 22 + (5 * z * tetromino_cell_w) + (tetromino_cell_w * j), tetromino_cell_w, tetromino_cell_w)
                             continue;
                         }
                     }
@@ -613,23 +633,24 @@ const sketch = (s) => {
     }
 
     Status_Bar.prototype.display_hold = function () {
-
-
         let container_x = this.x + this.w / 4;
-        let container_y = this.h * 4 /5;
+        let container_y = this.h * 4 / 5;
         let container_w = this.w / 2;
         let tetromino_cell_w = container_w / 4 - 4;
         let container_h = tetromino_cell_w * 6;
 
-        s.stroke("WHITE");
-        s.strokeWeight(3);
         s.noFill()
+        s.stroke(BORDER_COLOR);
         s.rect(container_x, container_y, container_w, container_h)
 
         if (!tetromino_hold) return;
 
-        can_swap_hold ? s.fill(tetromino_hold.color) : s.fill("gray")
-        
+        if(can_swap_hold) {
+            s.stroke(COLORS[tetromino_hold.color].dark);
+            s.fill(COLORS[tetromino_hold.color].hex)
+        }  else s.fill("gray")
+
+
         let p;
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
@@ -637,13 +658,14 @@ const sketch = (s) => {
 
                 for (let k = 0; k < tetromino_hold.shape.length; k++) {
                     if (p === tetromino_hold.shape[k]) {
-                        //Don't expect to understand this
-                        s.rect(container_x + tetromino_cell_w * i, container_y + container_h / 4 + (tetromino_cell_w * j), tetromino_cell_w, tetromino_cell_w)
+                        s.rect(container_x + tetromino_cell_w * i, container_y + container_h / 5 + (tetromino_cell_w * j), tetromino_cell_w, tetromino_cell_w)
                         continue;
                     }
                 }
             }
         }
+
+        s.fill(BACKGROUND_COLOR)
 
     }
 }
