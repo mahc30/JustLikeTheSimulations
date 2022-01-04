@@ -6,20 +6,15 @@ let height;
 const BACKGROUND_COLOR = 0
 const BOARD_BORDER_COLOR = "#FFFFFF"
 const BOARD_GRID_COLOR = "GRAY"
-const COLORS = ["CYAN", "ORANGE", "BLUE", "RED", "GREEN", "PURPLE", "YELLOW"]
 
 //Tetris rules
 const NUM_COLUMNS = 10;
 const NUM_ROWS = 20;
-const TETROMINO_START_POSITION = 6;
 const GRID_EMPTY_VALUE = -2;
-const GRID_CURRENT_TETROMINO_VALUE = -2;
 
 const TETROMINO_MATRIX_DIMENSIONS = 4;
 
 //Gameplay Options
-let dy = 1;
-let dx = 1;
 let tick_interval = 1000;
 
 
@@ -121,12 +116,6 @@ let cols_width;
 let rows_height;
 
 const sketch = (s) => {
-
-
-    s.preload = () => {
-
-    }
-
     s.setup = () => {
 
         //Board
@@ -135,20 +124,28 @@ const sketch = (s) => {
         let canvas = s.createCanvas(width, height);
         canvas.parent("tetris_viewport");
 
-        //Setup Board Canvas
         let div = document.getElementById("game_board");
         div.style.display = "none";
 
-        rows_height = height / NUM_ROWS;
-        cols_width = rows_height //Grid should always be squares so
-        let board_w = cols_width * NUM_COLUMNS
+        let adapt_height;
+        //Mobile Ver
+        if(height > width)
+            cols_width = (width * 2/3) / NUM_COLUMNS ; //Divide 2/3 of screen by number of cols
+        else
+            cols_width = height / NUM_ROWS
 
-        //Status board DOM position 
-        status_bar_w = board_w / 3
+        rows_height = cols_width;  //Grid should always be squares
+
+        let board_w = cols_width * NUM_COLUMNS
+        let board_h = rows_height * NUM_ROWS;
+
+        status_bar_w = board_w / 2;
         status_bar_x = cols_width * NUM_COLUMNS + 1
 
-        board = new Tetris_Board(1, 0, board_w, height); //Value 1 is Padding so it doesn't clip on left border
-        status_bar = new Status_Bar(status_bar_x, 0, status_bar_w, height);
+        board = new Tetris_Board(1, 0, board_w, board_h); //Value 1 is Padding so it doesn't clip on left border
+        status_bar = new Status_Bar(status_bar_x, 0, status_bar_w, board_h);
+
+        s.resizeCanvas(width, board_h)
     }
 
     setInterval(() => {
@@ -224,11 +221,11 @@ const sketch = (s) => {
     Tetris_Board.prototype.will_collision_right = function () {
 
         let board_offset = current_tetromino.x;
-
+        let p;
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                 p = i * TETROMINO_MATRIX_DIMENSIONS + j
-                for (k = 0; k < current_tetromino.shape.length; k++) {
+                for (let k = 0; k < current_tetromino.shape.length; k++) {
                     if (p === current_tetromino.shape[k]) {
                         //Si esta posición es parte de una figura
                         let relative_offset_x = board_offset + i + 1;
@@ -237,7 +234,7 @@ const sketch = (s) => {
                         if (relative_offset_x >= NUM_COLUMNS) return true;//Out of bounds
 
                         let nextBlockRight = this.grid[relative_offset_x][relative_offset_y];
-                        if (nextBlockRight != GRID_EMPTY_VALUE) return true;
+                        if (nextBlockRight !== GRID_EMPTY_VALUE) return true;
                     }
                 }
             }
@@ -247,11 +244,11 @@ const sketch = (s) => {
     Tetris_Board.prototype.will_collision_left = function () {
 
         let board_offset = current_tetromino.x;
-
+        let p;
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                 p = i * TETROMINO_MATRIX_DIMENSIONS + j
-                for (k = 0; k < current_tetromino.shape.length; k++) {
+                for (let k = 0; k < current_tetromino.shape.length; k++) {
                     if (p === current_tetromino.shape[k]) {
                         //Si esta posición es parte de una figura
                         let relative_offset_x = board_offset + i - 1;
@@ -259,7 +256,7 @@ const sketch = (s) => {
                         if (relative_offset_x < 0) return true;  //Out of bounds
 
                         let nextBlockLeft = this.grid[relative_offset_x][relative_offset_y];
-                        if (nextBlockLeft != GRID_EMPTY_VALUE) return true;  //Hay basura 
+                        if (nextBlockLeft !== GRID_EMPTY_VALUE) return true;  //Hay basura 
                     }
                 }
             }
@@ -272,7 +269,7 @@ const sketch = (s) => {
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                 p = i * TETROMINO_MATRIX_DIMENSIONS + j
-                for (k = 0; k < current_tetromino.shape.length; k++) {
+                for (let k = 0; k < current_tetromino.shape.length; k++) {
                     if (p === current_tetromino.shape[k]) {
                         //Si esta posición es parte de una figura
                         let relative_offset_x = current_tetromino.x + i;
@@ -281,7 +278,7 @@ const sketch = (s) => {
 
                         let nextBlockDown = this.grid[relative_offset_x][relative_offset_y];
                         if (
-                            nextBlockDown != GRID_EMPTY_VALUE //Hay basura 
+                            nextBlockDown !== GRID_EMPTY_VALUE //Hay basura 
                         ) return true;
 
                     }
@@ -302,7 +299,7 @@ const sketch = (s) => {
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                 p = i * TETROMINO_MATRIX_DIMENSIONS + j
-                for (k = 0; k < current_tetromino.shape.length; k++) {
+                for (let k = 0; k < current_tetromino.shape.length; k++) {
                     if (p === next_shape[k]) {
                         //Si esta posición es parte de una figura
                         let relative_offset_x = current_tetromino.x + i;
@@ -312,7 +309,7 @@ const sketch = (s) => {
 
                         let nextBlockDown = this.grid[relative_offset_x][relative_offset_y];
                         if (
-                            nextBlockDown != GRID_EMPTY_VALUE //Hay basura 
+                            nextBlockDown !== GRID_EMPTY_VALUE //Hay basura 
                         ) return true;
 
                     }
@@ -334,7 +331,7 @@ const sketch = (s) => {
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                 p = i * TETROMINO_MATRIX_DIMENSIONS + j
-                for (k = 0; k < current_tetromino.shape.length; k++) {
+                for (let  k = 0; k < current_tetromino.shape.length; k++) {
                     if (p === next_shape[k]) {
                         //Si esta posición es parte de una figura
                         let relative_offset_x = current_tetromino.x + i;
@@ -344,7 +341,7 @@ const sketch = (s) => {
 
                         let nextBlockDown = this.grid[relative_offset_x][relative_offset_y];
                         if (
-                            nextBlockDown != GRID_EMPTY_VALUE //Hay basura 
+                            nextBlockDown !== GRID_EMPTY_VALUE //Hay basura 
                         ) return true;
 
                     }
@@ -355,11 +352,11 @@ const sketch = (s) => {
     }
 
     Tetris_Board.prototype.create_trash = function () {
-
+        let p;
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                 p = i * TETROMINO_MATRIX_DIMENSIONS + j
-                for (k = 0; k < current_tetromino.shape.length; k++) {
+                for (let  k = 0; k < current_tetromino.shape.length; k++) {
                     if (p === current_tetromino.shape[k]) {
                         //Si esta posición es parte de una figura
                         let x_offset = current_tetromino.x + i;
@@ -453,7 +450,7 @@ const sketch = (s) => {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                 p = i * TETROMINO_MATRIX_DIMENSIONS + j
 
-                for (k = 0; k < this.shape.length; k++) { //Contains, max 4 iterations so it should be fine...
+                for (let k = 0; k < this.shape.length; k++) { //Contains, max 4 iterations so it should be fine...
                     if (p === this.shape[k]) {
                         s.rect((this.x + i) * this.w, (this.y + j) * this.w, this.w, this.w)
                         continue;
@@ -507,6 +504,7 @@ const sketch = (s) => {
     }
 
     Tetromino.setup_queue = () => {
+        tetromino_queue = []
         for (let i = 0; i < 4; i++) {
             tetromino_queue.push(Tetromino.new_random_tetromino())
         }
@@ -528,6 +526,8 @@ const sketch = (s) => {
         //If there is already one, swap and reset
         let temp = tetromino_hold;
         tetromino_hold = current_tetromino;
+        tetromino_hold.shape = tetromino_hold.shape_options[0]
+
         current_tetromino = temp;
         current_tetromino.x = 3;
         current_tetromino.y = 0;
@@ -599,7 +599,7 @@ const sketch = (s) => {
                 for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                     p = i * TETROMINO_MATRIX_DIMENSIONS + j
 
-                    for (k = 0; k < t.shape.length; k++) {
+                    for (let k = 0; k < t.shape.length; k++) {
                         if (p === t.shape[k]) {
                             //Don't expect to understand this
                             s.rect(container_x + tetromino_cell_w * i, container_h / 22 + (container_y + 5 * z * tetromino_cell_w) + (tetromino_cell_w * j), tetromino_cell_w, tetromino_cell_w)
@@ -616,10 +616,10 @@ const sketch = (s) => {
 
 
         let container_x = this.x + this.w / 4;
-        let container_y = this.h / 2;
+        let container_y = this.h * 4 /5;
         let container_w = this.w / 2;
         let tetromino_cell_w = container_w / 4 - 4;
-        let container_h = tetromino_cell_w * 5;
+        let container_h = tetromino_cell_w * 6;
 
         s.stroke("WHITE");
         s.strokeWeight(3);
@@ -635,7 +635,7 @@ const sketch = (s) => {
             for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
                 p = i * TETROMINO_MATRIX_DIMENSIONS + j
 
-                for (k = 0; k < tetromino_hold.shape.length; k++) {
+                for (let k = 0; k < tetromino_hold.shape.length; k++) {
                     if (p === tetromino_hold.shape[k]) {
                         //Don't expect to understand this
                         s.rect(container_x + tetromino_cell_w * i, container_y + container_h / 4 + (tetromino_cell_w * j), tetromino_cell_w, tetromino_cell_w)
