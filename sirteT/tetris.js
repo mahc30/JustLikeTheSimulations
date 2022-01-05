@@ -20,11 +20,15 @@ const BOARD_GRID_COLOR = COLORS[7].dark;
 const NUM_COLUMNS = 10;
 const NUM_ROWS = 20;
 const GRID_EMPTY_VALUE = -2;
-
 const TETROMINO_MATRIX_DIMENSIONS = 4;
+const STARTING_TICK_INTERVAL = 200;
 
 //Gameplay Options
-let tick_interval = 400;
+let tick_interval = STARTING_TICK_INTERVAL;
+let tick_handler;
+let grace_period_time = 400;
+let grace_period = true;
+let grace_period_handler;
 
 /*
 LEGEND
@@ -161,9 +165,7 @@ const sketch = (s) => {
         canvas.parent("tetris_viewport");
     }
 
-    setInterval(() => {
-        board.tick();
-    }, tick_interval);
+    tick_handler = start_tick_interval()
 
     s.draw = () => {
         s.background(BACKGROUND_COLOR)
@@ -217,10 +219,17 @@ const sketch = (s) => {
         //Try Move current Tetromino
         if (!this.will_collision_down()) {
             current_tetromino.move_down();
+            restart_grace_period_timeout();
             return;
         }
 
-        if (this.create_trash()) this.game_over();
+        if(grace_period) return;
+
+        if (this.create_trash()) {
+            this.game_over();
+            return;
+        }
+
         //Check for complete rows
         let full_rows = this.check_full_row()
 
@@ -229,6 +238,7 @@ const sketch = (s) => {
         }
 
         Tetromino.update_current_tetromino()
+        grace_period = true;
         can_swap_hold = true;
     }
 
@@ -317,7 +327,7 @@ const sketch = (s) => {
                     if (p === next_shape[k]) {
                         //Si esta posición es parte de una figura
                         let relative_offset_x = current_tetromino.x + i;
-                        let relative_offset_y = current_tetromino.y + j + 1;
+                        let relative_offset_y = current_tetromino.y + j;
                         if (relative_offset_y >= NUM_ROWS) return true  //Out of bounds
                         if (relative_offset_x >= NUM_COLUMNS || relative_offset_x < 0) return true  //Out of bounds
 
@@ -349,13 +359,14 @@ const sketch = (s) => {
                     if (p === next_shape[k]) {
                         //Si esta posición es parte de una figura
                         let relative_offset_x = current_tetromino.x + i;
-                        let relative_offset_y = current_tetromino.y + j + 1;
+                        let relative_offset_y = current_tetromino.y + j;
                         if (relative_offset_y >= NUM_ROWS) return true  //Out of bounds
                         if (relative_offset_x >= NUM_COLUMNS || relative_offset_x < 0) return true  //Out of bounds
 
                         let nextBlockDown = this.grid[relative_offset_x][relative_offset_y];
                         if (
-                            nextBlockDown !== GRID_EMPTY_VALUE //Hay basura 
+                            nextBlockDown !== GRID_EMPTY_VALUE //Hay basura
+
                         ) return true;
 
                     }
@@ -462,6 +473,9 @@ const sketch = (s) => {
 
     Tetris_Board.prototype.check_fast_drop = function () {
         if (s.keyIsDown(s.DOWN_ARROW)) {
+            if (grace_period) {
+                restart_grace_period_timeout(grace_period_handler)
+            }
             if (board.will_collision_down()) return
             current_tetromino.move_down();
         }
@@ -474,6 +488,7 @@ const sketch = (s) => {
             }
         }
         tetromino_hold = null;
+        tick_interval = STARTING_TICK_INTERVAL;
     }
 
     let Tetromino = function (x, y, w, shape_options, color, shape) {
@@ -694,13 +709,36 @@ const sketch = (s) => {
 
     //Gameplay
     function increase_tick_speed() {
-        let ds = 20;
-        if (tick_interval >= 40)
+        let ds = 1;
+        if (tick_interval >= 100)
             tick_interval -= ds;
+    }
+
+    function start_tick_interval() {
+        return window.setInterval(() => {
+            board.tick();
+        }, tick_interval);
+    }
+
+    function start_grace_period_timeout() {
+        grace_period = true;
+        grace_period_handler = window.setTimeout(() => {
+            grace_period = false;
+        }, grace_period_time)
+    }
+
+    function restart_grace_period_timeout() {
+        window.clearTimeout(grace_period_handler)
+        start_grace_period_timeout()
     }
 
     // CONTROLS
     s.keyPressed = () => {
+
+        if (grace_period) {
+            restart_grace_period_timeout(grace_period_handler)
+        }
+
         switch (s.keyCode) {
             case s.RIGHT_ARROW:
                 if (board.will_collision_right()) break;
@@ -737,6 +775,11 @@ const sketch = (s) => {
     }
 
     s.mousePressed = () => {
+
+        if (grace_period) {
+            restart_grace_period_timeout(grace_period_handler)
+        }
+
         if (board.will_collision_rotate_right()) return;
         current_tetromino.rotate_90_right();
     }
