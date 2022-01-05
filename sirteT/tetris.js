@@ -217,13 +217,13 @@ const sketch = (s) => {
     Tetris_Board.prototype.tick = function () {
 
         //Try Move current Tetromino
-        if (!this.will_collision_down()) {
+        if (!this.will_collision_down(current_tetromino)) {
             current_tetromino.move_down();
             restart_grace_period_timeout();
             return;
         }
 
-        if(grace_period) return;
+        if (grace_period) return;
 
         if (this.create_trash()) {
             this.game_over();
@@ -287,7 +287,7 @@ const sketch = (s) => {
         }
     }
 
-    Tetris_Board.prototype.will_collision_down = function () {
+    Tetris_Board.prototype.will_collision_down = function (current_tetromino) {
         let p;
 
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
@@ -309,6 +309,8 @@ const sketch = (s) => {
                 }
             }
         }
+
+        return false;
     }
 
     Tetris_Board.prototype.will_collision_rotate_right = function () {
@@ -407,6 +409,19 @@ const sketch = (s) => {
         }
     }
 
+    Tetris_Board.prototype.hard_drop = function () {
+        let ghost = new Tetromino(current_tetromino.x, current_tetromino.y, current_tetromino.w, current_tetromino.shape_options, current_tetromino.color, current_tetromino.shape)
+
+        console.log(ghost)
+
+        while (!this.will_collision_down(ghost)) {
+            ghost.move_down();
+        }
+
+        current_tetromino.hard_drop(ghost.x, ghost.y);
+
+    }
+
     Tetris_Board.prototype.create_trash = function () {
         let p;
         for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
@@ -476,7 +491,7 @@ const sketch = (s) => {
             if (grace_period) {
                 restart_grace_period_timeout(grace_period_handler)
             }
-            if (board.will_collision_down()) return
+            if (board.will_collision_down(current_tetromino)) return
             current_tetromino.move_down();
         }
     }
@@ -531,6 +546,11 @@ const sketch = (s) => {
 
     Tetromino.prototype.move_right = function () {
         this.x++;
+    }
+
+    Tetromino.prototype.hard_drop = function (x, y) {
+        this.x = x;
+        this.y = y;
     }
 
     Tetromino.prototype.rotate_90_right = function () {
@@ -732,6 +752,11 @@ const sketch = (s) => {
         start_grace_period_timeout()
     }
 
+    function skip_grace_period() {
+        window.clearTimeout(grace_period_handler)
+        grace_period = false;
+    }
+
     // CONTROLS
     s.keyPressed = () => {
 
@@ -749,7 +774,7 @@ const sketch = (s) => {
                 current_tetromino.move_left();
                 break;
             case s.DOWN_ARROW:
-                if (board.will_collision_down()) break;
+                if (board.will_collision_down(current_tetromino)) break;
                 current_tetromino.move_down();
                 break;
             case 69: //E
@@ -763,6 +788,10 @@ const sketch = (s) => {
             case 87: //W
                 if (board.will_collision_rotate_left()) break;
                 current_tetromino.rotate_180();
+                break;
+            case 32: //Spacebar
+                board.hard_drop();
+                skip_grace_period()
                 break;
             case 16: //Shift
                 if (!can_swap_hold) break;
