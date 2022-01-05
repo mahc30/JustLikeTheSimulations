@@ -488,9 +488,7 @@ const sketch = (s) => {
 
     Tetris_Board.prototype.check_fast_drop = function () {
         if (s.keyIsDown(s.DOWN_ARROW)) {
-            if (grace_period) {
-                restart_grace_period_timeout(grace_period_handler)
-            }
+
             if (board.will_collision_down(current_tetromino)) return
             current_tetromino.move_down();
         }
@@ -755,43 +753,47 @@ const sketch = (s) => {
     function skip_grace_period() {
         window.clearTimeout(grace_period_handler)
         grace_period = false;
+        board.tick();
     }
 
     // CONTROLS
     s.keyPressed = () => {
 
-        if (grace_period) {
-            restart_grace_period_timeout(grace_period_handler)
-        }
-
         switch (s.keyCode) {
             case s.RIGHT_ARROW:
                 if (board.will_collision_right()) break;
                 current_tetromino.move_right();
+                restart_grace_period_timeout(grace_period_handler)
                 break;
             case s.LEFT_ARROW:
                 if (board.will_collision_left()) break;
                 current_tetromino.move_left();
+                restart_grace_period_timeout(grace_period_handler)
                 break;
             case s.DOWN_ARROW:
                 if (board.will_collision_down(current_tetromino)) break;
                 current_tetromino.move_down();
+                restart_grace_period_timeout(grace_period_handler)
                 break;
             case 69: //E
                 if (board.will_collision_rotate_right()) break;
                 current_tetromino.rotate_90_right();
+                restart_grace_period_timeout(grace_period_handler)
                 break;
             case 81: //Q
                 if (board.will_collision_rotate_left()) break;
                 current_tetromino.rotate_90_left();
+                restart_grace_period_timeout(grace_period_handler)
                 break;
             case 87: //W
                 if (board.will_collision_rotate_left()) break;
                 current_tetromino.rotate_180();
+                restart_grace_period_timeout(grace_period_handler)
                 break;
             case 32: //Spacebar
                 board.hard_drop();
                 skip_grace_period()
+                
                 break;
             case 16: //Shift
                 if (!can_swap_hold) break;
