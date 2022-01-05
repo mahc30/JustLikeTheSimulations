@@ -24,8 +24,7 @@ const GRID_EMPTY_VALUE = -2;
 const TETROMINO_MATRIX_DIMENSIONS = 4;
 
 //Gameplay Options
-let tick_interval = 1000;
-
+let tick_interval = 400;
 
 /*
 LEGEND
@@ -48,9 +47,9 @@ const I = {
 
 const J = {
     shape_options: [
-        [6, 10, 13, 14],
+        [5, 9, 13, 12],
         [6, 10, 4, 5],
-        [6, 5, 9, 13],
+        [5, 4, 8, 12],
         [4, 8, 9, 10],
     ],
     color: 5
@@ -76,22 +75,30 @@ const O = {
     color: 0
 }
 
+
 const S = {
     shape_options: [
-        [12, 8, 9, 5],
+        [4, 8, 9, 13],
         [12, 13, 9, 10],
-        [13, 9, 10, 6],
+        [5, 9, 10, 14],
         [11, 10, 14, 13],
     ],
     color: 2
 }
 
+/*
+LEGEND
+| 0 | 4 | 8 | 12 |
+| 1 | 5 | 9 | 13 |
+| 2 | 6 |10 | 14 |
+| 3 | 7 |11 | 15 |
+*/
 const Z = {
     shape_options: [
-        [4, 8, 9, 13],
+        [12, 8, 9, 5],
+        [8, 9, 13, 14],
+        [13, 9, 10, 6],
         [9, 10, 14, 15],
-        [4, 8, 9, 13],
-        [5, 6, 10, 11],
     ],
     color: 6
 }
@@ -221,7 +228,7 @@ const sketch = (s) => {
             this.delete_rows(full_rows);
         }
 
-        Tetromino.update_current_tetromino() 
+        Tetromino.update_current_tetromino()
         can_swap_hold = true;
     }
 
@@ -355,7 +362,38 @@ const sketch = (s) => {
                 }
             }
         }
+    }
 
+    Tetris_Board.prototype.will_collision_rotate_180 = function () {
+
+        let next_rotation = current_tetromino.rotation;
+        next_rotation === 0 ? next_rotation = 3 : next_rotation--;
+        next_rotation === 0 ? next_rotation = 3 : next_rotation--;
+
+        let next_shape = current_tetromino.shape_options[next_rotation];
+
+        let p;
+
+        for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
+            for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
+                p = i * TETROMINO_MATRIX_DIMENSIONS + j
+                for (let k = 0; k < current_tetromino.shape.length; k++) {
+                    if (p === next_shape[k]) {
+                        //Si esta posición es parte de una figura
+                        let relative_offset_x = current_tetromino.x + i;
+                        let relative_offset_y = current_tetromino.y + j + 1;
+                        if (relative_offset_y >= NUM_ROWS) return true  //Out of bounds
+                        if (relative_offset_x >= NUM_COLUMNS || relative_offset_x < 0) return true  //Out of bounds
+
+                        let nextBlockDown = this.grid[relative_offset_x][relative_offset_y];
+                        if (
+                            nextBlockDown !== GRID_EMPTY_VALUE //Hay basura 
+                        ) return true;
+
+                    }
+                }
+            }
+        }
     }
 
     Tetris_Board.prototype.create_trash = function () {
@@ -430,7 +468,6 @@ const sketch = (s) => {
     }
 
     Tetris_Board.prototype.game_over = function () {
-        alert("Gg")
         for (let i = 0; i < this.grid.length; i++) {
             for (let j = 0; j < this.grid[0].length; j++) {
                 this.grid[i][j] = GRID_EMPTY_VALUE;
@@ -505,13 +542,28 @@ const sketch = (s) => {
         this.shape = this.shape_options[this.rotation]
     }
 
+    Tetromino.prototype.rotate_180 = function () {
+
+        for (let i = 1; i <= 2; i++) {
+
+            if (this.rotation === 3) {
+                this.rotation = 0;
+            }
+            else {
+                this.rotation++;
+            }
+        }
+
+        this.shape = this.shape_options[this.rotation]
+    }
+
     Tetromino.update_tetromino_queue = () => {
         let set = [];
         for (let i = 0; i < figures.length; i++) {
             set.push(new Tetromino(3, 0, cols_width, figures[i].shape_options, figures[i].color))
         }
         //Shuffle set
-        for(let i = 0; i < set.length; i++){
+        for (let i = 0; i < set.length; i++) {
             let rand = Math.random() * (set.length - 1);
             rand = Math.round(rand);
             //Swap
@@ -524,7 +576,8 @@ const sketch = (s) => {
 
     Tetromino.update_current_tetromino = () => {
         current_tetromino = tetromino_queue.splice(0, 1)[0];
-        if(tetromino_queue.length <= 4) Tetromino.update_tetromino_queue();
+        if (tetromino_queue.length <= 4) Tetromino.update_tetromino_queue();
+        increase_tick_speed()
     }
 
     Tetromino.hold = () => {
@@ -544,8 +597,6 @@ const sketch = (s) => {
         current_tetromino.x = 3;
         current_tetromino.y = 0;
     }
-
-
 
     let Status_Bar = function (x, y, w, h) {
         this.x = x;
@@ -576,7 +627,7 @@ const sketch = (s) => {
 
         //Custom Draw for tetrominos so they fit in status bar without messing with game logic
         //Only drawing first 4 tetros
-        for(let z = 0; z < 4; z++){
+        for (let z = 0; z < 4; z++) {
             s.fill(COLORS[tetromino_queue[z].color].hex)
             s.stroke(COLORS[tetromino_queue[z].color].dark)
 
@@ -641,6 +692,13 @@ const sketch = (s) => {
 
     }
 
+    //Gameplay
+    function increase_tick_speed() {
+        let ds = 20;
+        if (tick_interval >= 40)
+            tick_interval -= ds;
+    }
+
     // CONTROLS
     s.keyPressed = () => {
         switch (s.keyCode) {
@@ -664,6 +722,10 @@ const sketch = (s) => {
                 if (board.will_collision_rotate_left()) break;
                 current_tetromino.rotate_90_left();
                 break;
+            case 87: //W
+                if (board.will_collision_rotate_left()) break;
+                current_tetromino.rotate_180();
+                break;
             case 16: //Shift
                 if (!can_swap_hold) break;
                 Tetromino.hold()
@@ -673,8 +735,8 @@ const sketch = (s) => {
                 break;
         }
     }
-    s.mousePressed = () => {
 
+    s.mousePressed = () => {
         if (board.will_collision_rotate_right()) return;
         current_tetromino.rotate_90_right();
     }
@@ -719,7 +781,7 @@ const sketch = (s) => {
             } else {
                 //Swipe down
                 if (!board.will_collision_rotate_right())
-                current_tetromino.rotate_90_right();
+                    current_tetromino.rotate_90_right();
             }
         }
         /* reset values */
