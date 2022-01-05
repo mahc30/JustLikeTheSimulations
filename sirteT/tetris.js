@@ -1,21 +1,18 @@
-//Dom
-let width;
-let height;
-
 //Styles
 const COLORS =
-    [{ "name": "Pale Spring Bud", "hex": "#E6E8B1", "light": "#eeefc8", "dark":"#8a8b6a"}, // Beach
-    { "name": "Wisteria", "hex": "#BA9EDC"  , "light": "#c1a8e0", "dark":"#826f9a"}, //Light Purple
-    { "name": "Radical Red", "hex": "#FD3F60" , "light": "#fd5270", "dark":"#b12c43" }, //Red
-    { "name": "Star Command Blue", "hex": "#117EBE" , "light": "#298bc5", "dark":"#0c5885" }, //Blue
-    { "name": "Sky Blue Crayola", "hex": "#10b2da" , "light": "#58c9e5", "dark":"#0b7d99" }, // Light Blue
-    { "name": "Orange", "hex": "#ff6205"  , "light": "#ff8137", "dark":"#b34504" }, //Orange
-    { "name": "Green", "hex": "#60FD3F"  , "light": "#80fd65", "dark":"#3a9826" }, //Green
-    { "name": "Complementary Beach", "hex": "#B1E8CF", "light": "#c1edd9", "dark":"#7ca291"}, //Complementary Beach
-];
-    
+    [{ "name": "Pale Spring Bud", "hex": "#eeefc8", "light": "#D9DC8A", "dark": "#8a8b6a" }, // Beach
+    { "name": "Wisteria", "hex": "#BA9EDC", "light": "#c1a8e0", "dark": "#826f9a" }, //Light Purple
+    { "name": "Radical Red", "hex": "#FD3F60", "light": "#fd5270", "dark": "#b12c43" }, //Red
+    { "name": "Star Command Blue", "hex": "#117EBE", "light": "#298bc5", "dark": "#0c5885" }, //Blue
+    { "name": "Sky Blue Crayola", "hex": "#10b2da", "light": "#58c9e5", "dark": "#0b7d99" }, // Light Blue
+    { "name": "Orange", "hex": "#ff6205", "light": "#ff8137", "dark": "#b34504" }, //Orange
+    { "name": "Green", "hex": "#60FD3F", "light": "#80fd65", "dark": "#3a9826" }, //Green
+    { "name": "Complementary Beach", "hex": "#B1E8CF", "light": "#c1edd9", "dark": "#7ca291" }, //Complementary Beach
+    ];
+
 
 const BACKGROUND_COLOR = COLORS[7].light;
+const BOARD_BACKGROUND_COLOR = COLORS[7].hex
 const BORDER_COLOR = COLORS[7].dark;
 const BOARD_GRID_COLOR = COLORS[7].dark;
 
@@ -28,6 +25,7 @@ const TETROMINO_MATRIX_DIMENSIONS = 4;
 
 //Gameplay Options
 let tick_interval = 1000;
+
 
 /*
 LEGEND
@@ -82,7 +80,7 @@ const S = {
     shape_options: [
         [12, 8, 9, 5],
         [12, 13, 9, 10],
-        [14, 10, 11, 7],
+        [13, 9, 10, 6],
         [11, 10, 14, 13],
     ],
     color: 2
@@ -126,20 +124,20 @@ let current_tetromino;
 let cols_width;
 let rows_height;
 
+//helpers for swipe detection for mobile gameplay
+var xDown = null;
+var yDown = null;
+
+
 const sketch = (s) => {
     s.setup = () => {
 
-        //Board
-        width = document.getElementById("tetris_viewport").clientWidth;
-        height = document.getElementById("tetris_viewport").clientHeight;
-        let canvas = s.createCanvas(width, height);
-        canvas.parent("tetris_viewport");
-
         //Mobile Ver
-        if (height > width)
-            cols_width = (width * 2 / 3) / NUM_COLUMNS; //Divide 2/3 of screen by number of cols
-        else
-            cols_width = height / NUM_ROWS
+        if (s.windowHeight > s.windowWidth) {
+            cols_width = (s.windowWidth * 2 / 3) / NUM_COLUMNS; //Divide 2/3 of screen by number of cols
+        } else {
+            cols_width = s.windowHeight / NUM_ROWS - 1 // -1 is a small offset so game doesn't takes the entire window
+        }
 
         rows_height = cols_width;  //Grid should always be squares
 
@@ -152,7 +150,8 @@ const sketch = (s) => {
         board = new Tetris_Board(1, 0, board_w, board_h); //Value 1 is Padding so it doesn't clip on left border
         status_bar = new Status_Bar(status_bar_x, 0, status_bar_w, board_h);
 
-        s.resizeCanvas(board_w + status_bar_w, board_h)
+        let canvas = s.createCanvas(board_w + status_bar_w, board_h);
+        canvas.parent("tetris_viewport");
     }
 
     setInterval(() => {
@@ -161,6 +160,7 @@ const sketch = (s) => {
 
     s.draw = () => {
         s.background(BACKGROUND_COLOR)
+
         board.draw()
         status_bar.draw()
     }
@@ -177,15 +177,17 @@ const sketch = (s) => {
             this.grid[i] = new Array(NUM_ROWS).fill(GRID_EMPTY_VALUE)
         }
 
-        Tetromino.setup_queue();
+        Tetromino.update_tetromino_queue();
         Tetromino.update_current_tetromino();
     }
 
     Tetris_Board.prototype.draw = function () {
         s.stroke(BORDER_COLOR)
+        s.fill(BOARD_BACKGROUND_COLOR)
+        s.strokeWeight(4);
 
         //Borders
-        s.rect(this.x, this.y, this.x + this.w, this.y + this.h)
+        s.rect(this.x, this.y, this.w, this.h)
 
         //Grid
         s.stroke(BOARD_GRID_COLOR)
@@ -219,10 +221,8 @@ const sketch = (s) => {
             this.delete_rows(full_rows);
         }
 
-        Tetromino.update_current_tetromino() //Spawn Tetromino (3,-2)
+        Tetromino.update_current_tetromino() 
         can_swap_hold = true;
-
-
     }
 
     Tetris_Board.prototype.will_collision_right = function () {
@@ -505,23 +505,26 @@ const sketch = (s) => {
         this.shape = this.shape_options[this.rotation]
     }
 
-    Tetromino.new_random_tetromino = () => {
-        let rand = Math.floor(Math.random() * figures.length);
-
-        //New Tetrominos are spawned to status bar first so X and Y correspond to queue container, values are updated when current Tetromino is updated
-        return new Tetromino(3, 0, cols_width, figures[rand].shape_options, figures[rand].color)
-    }
-
-    Tetromino.setup_queue = () => {
-        tetromino_queue = []
-        for (let i = 0; i < 4; i++) {
-            tetromino_queue.push(Tetromino.new_random_tetromino())
+    Tetromino.update_tetromino_queue = () => {
+        let set = [];
+        for (let i = 0; i < figures.length; i++) {
+            set.push(new Tetromino(3, 0, cols_width, figures[i].shape_options, figures[i].color))
         }
+        //Shuffle set
+        for(let i = 0; i < set.length; i++){
+            let rand = Math.random() * (set.length - 1);
+            rand = Math.round(rand);
+            //Swap
+            let temp = set[i];
+            set[i] = set[rand]
+            set[rand] = temp
+        }
+        tetromino_queue.push(...set)
     }
 
     Tetromino.update_current_tetromino = () => {
         current_tetromino = tetromino_queue.splice(0, 1)[0];
-        tetromino_queue.push(Tetromino.new_random_tetromino())
+        if(tetromino_queue.length <= 4) Tetromino.update_tetromino_queue();
     }
 
     Tetromino.hold = () => {
@@ -542,6 +545,103 @@ const sketch = (s) => {
         current_tetromino.y = 0;
     }
 
+
+
+    let Status_Bar = function (x, y, w, h) {
+        this.x = x;
+        this.y = y;
+        this.h = h;
+        this.w = w;
+    }
+
+    Status_Bar.prototype.draw = function () {
+        s.noFill()
+        s.stroke(BORDER_COLOR);
+        s.strokeWeight(4);
+        s.rect(this.x, this.y, this.w - 4, this.h) //Border width has -4 offset because canvas is drawn short
+        s.strokeWeight(2);
+
+        this.display_queue()
+        this.display_hold()
+    }
+
+    Status_Bar.prototype.display_queue = function () {
+        let container_x = this.x + this.w / 4;
+        let container_y = this.h / 16;
+        let container_w = this.w / 2;
+        let tetromino_cell_w = container_w / 4 - 4;
+        let container_h = tetromino_cell_w * 22;
+
+        s.rect(container_x, container_y, container_w, container_h)
+
+        //Custom Draw for tetrominos so they fit in status bar without messing with game logic
+        //Only drawing first 4 tetros
+        for(let z = 0; z < 4; z++){
+            s.fill(COLORS[tetromino_queue[z].color].hex)
+            s.stroke(COLORS[tetromino_queue[z].color].dark)
+
+            let p;
+            for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
+                for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
+                    p = i * TETROMINO_MATRIX_DIMENSIONS + j
+
+                    for (let k = 0; k < tetromino_queue[z].shape.length; k++) {
+                        if (p === tetromino_queue[z].shape[k]) {
+                            /*
+                                Y Explanation: Container_y = relative to status bar
+                                + container_h / 22 = padding top
+                                + 5 * z * tetromino_cell_w = padding top the size of 5 tetromino cells for every tetromino
+                                + tetromino_cell_w * j = square on every cell where tetromino should be vertical-wise 
+
+                            */
+                            s.rect(container_x + tetromino_cell_w * i, container_y + container_h / 22 + (5 * z * tetromino_cell_w) + (tetromino_cell_w * j), tetromino_cell_w, tetromino_cell_w)
+                            continue;
+                        }
+                    }
+                }
+            }
+        };
+
+    }
+
+    Status_Bar.prototype.display_hold = function () {
+        let container_x = this.x + this.w / 4;
+        let container_y = this.h * 4 / 5;
+        let container_w = this.w / 2;
+        let tetromino_cell_w = container_w / 4 - 4;
+        let container_h = tetromino_cell_w * 6;
+
+        s.noFill()
+        s.stroke(BORDER_COLOR);
+        s.rect(container_x, container_y, container_w, container_h)
+
+        if (!tetromino_hold) return;
+
+        if (can_swap_hold) {
+            s.stroke(COLORS[tetromino_hold.color].dark);
+            s.fill(COLORS[tetromino_hold.color].hex)
+        } else s.fill("gray")
+
+
+        let p;
+        for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
+            for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
+                p = i * TETROMINO_MATRIX_DIMENSIONS + j
+
+                for (let k = 0; k < tetromino_hold.shape.length; k++) {
+                    if (p === tetromino_hold.shape[k]) {
+                        s.rect(container_x + tetromino_cell_w * i, container_y + container_h / 5 + (tetromino_cell_w * j), tetromino_cell_w, tetromino_cell_w)
+                        continue;
+                    }
+                }
+            }
+        }
+
+        s.fill(BACKGROUND_COLOR)
+
+    }
+
+    // CONTROLS
     s.keyPressed = () => {
         switch (s.keyCode) {
             case s.RIGHT_ARROW:
@@ -573,98 +673,62 @@ const sketch = (s) => {
                 break;
         }
     }
+    s.mousePressed = () => {
 
-    let Status_Bar = function (x, y, w, h) {
-        this.x = x;
-        this.y = y;
-        this.h = h;
-        this.w = w;
+        if (board.will_collision_rotate_right()) return;
+        current_tetromino.rotate_90_right();
     }
 
-    Status_Bar.prototype.draw = function () {
-        s.noFill()
-        s.stroke(BORDER_COLOR);
-        s.strokeWeight(2);
-        s.rect(this.x, this.y, this.w, this.h) //Border
-
-        this.display_queue()
-        this.display_hold()
+    //Swipe detection for mobile gameplay
+    function getTouches(evt) {
+        return evt.touches ||             // browser API
+            evt.originalEvent.touches; // jQuery
     }
 
-    Status_Bar.prototype.display_queue = function () {
-        let container_x = this.x + this.w / 4;
-        let container_y = this.h / 16;
-        let container_w = this.w / 2;
-        let tetromino_cell_w = container_w / 4 - 4;
-        let container_h = tetromino_cell_w * 22;
+    s.touchStarted = (evt) => {
+        const firstTouch = getTouches(evt)[0];
+        xDown = firstTouch.clientX;
+        yDown = firstTouch.clientY;
+    };
 
-        s.rect(container_x, container_y, container_w, container_h)
-
-        //Custom Draw for tetrominos so they fit in status bar without messing with game logic
-        tetromino_queue.forEach((t, z) => {
-            s.fill(COLORS[t.color].hex)
-            s.stroke(COLORS[t.color].dark)
-
-            let p;
-            for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
-                for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
-                    p = i * TETROMINO_MATRIX_DIMENSIONS + j
-
-                    for (let k = 0; k < t.shape.length; k++) {
-                        if (p === t.shape[k]) {
-                            /*
-                                Y Explanation: Container_y = relative to status bar
-                                + container_h / 22 = padding top
-                                + 5 * z * tetromino_cell_w = padding top the size of 5 tetromino cells for every tetromino
-                                + tetromino_cell_w * j = square on every cell where tetromino should be vertical-wise 
-
-                            */
-                            s.rect(container_x + tetromino_cell_w * i, container_y + container_h / 22 + (5 * z * tetromino_cell_w) + (tetromino_cell_w * j), tetromino_cell_w, tetromino_cell_w)
-                            continue;
-                        }
-                    }
-                }
-            }
-        });
-
-    }
-
-    Status_Bar.prototype.display_hold = function () {
-        let container_x = this.x + this.w / 4;
-        let container_y = this.h * 4 / 5;
-        let container_w = this.w / 2;
-        let tetromino_cell_w = container_w / 4 - 4;
-        let container_h = tetromino_cell_w * 6;
-
-        s.noFill()
-        s.stroke(BORDER_COLOR);
-        s.rect(container_x, container_y, container_w, container_h)
-
-        if (!tetromino_hold) return;
-
-        if(can_swap_hold) {
-            s.stroke(COLORS[tetromino_hold.color].dark);
-            s.fill(COLORS[tetromino_hold.color].hex)
-        }  else s.fill("gray")
-
-
-        let p;
-        for (let i = 0; i < TETROMINO_MATRIX_DIMENSIONS; i++) {
-            for (let j = 0; j < TETROMINO_MATRIX_DIMENSIONS; j++) {
-                p = i * TETROMINO_MATRIX_DIMENSIONS + j
-
-                for (let k = 0; k < tetromino_hold.shape.length; k++) {
-                    if (p === tetromino_hold.shape[k]) {
-                        s.rect(container_x + tetromino_cell_w * i, container_y + container_h / 5 + (tetromino_cell_w * j), tetromino_cell_w, tetromino_cell_w)
-                        continue;
-                    }
-                }
-            }
+    s.touchMoved = (evt) => {
+        if (!xDown || !yDown) {
+            return;
         }
 
-        s.fill(BACKGROUND_COLOR)
+        var xUp = evt.touches[0].clientX;
+        var yUp = evt.touches[0].clientY;
 
-    }
+        var xDiff = xDown - xUp;
+        var yDiff = yDown - yUp;
+
+        if (Math.abs(xDiff) > Math.abs(yDiff)) {/*most significant*/
+            if (xDiff > 0) {
+                if (!board.will_collision_left())
+                    current_tetromino.move_left();
+
+            } else {
+                if (!board.will_collision_right())
+                    current_tetromino.move_right();
+            }
+        } else {
+            if (yDiff > 0) {
+                //Swipe Up
+                if (can_swap_hold)
+                    Tetromino.hold()
+            } else {
+                //Swipe down
+                if (!board.will_collision_rotate_right())
+                current_tetromino.rotate_90_right();
+            }
+        }
+        /* reset values */
+        xDown = null;
+        yDown = null;
+    };
+
 }
+
+
 
 let myp5 = new p5(sketch);
