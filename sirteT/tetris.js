@@ -34,6 +34,7 @@ let tick_handler;
 let grace_period_time = 400;
 let grace_period = false;
 let grace_period_handler;
+let check_fast_drop = true;
 
 /*
 LEGEND
@@ -64,13 +65,6 @@ const J = {
     color: 5
 }
 
-/*
-LEGEND
-| 0 | 4 | 8 | 12 |
-| 1 | 5 | 9 | 13 |
-| 2 | 6 |10 | 14 |
-| 3 | 7 |11 | 15 |
-*/
 const L = {
     shape_options: [
         [4, 5, 9, 13],
@@ -223,7 +217,7 @@ const sketch = (s) => {
         }
 
         this.draw_trash();
-        this.check_fast_drop();
+        if(check_fast_drop) this.check_fast_drop();
         current_tetromino.draw();
     }
 
@@ -636,6 +630,7 @@ const sketch = (s) => {
         current_tetromino = tetromino_queue.splice(0, 1)[0];
         if (tetromino_queue.length <= 4) Tetromino.update_tetromino_queue();
         increase_tick_speed()
+        check_fast_drop = false
     }
 
     Tetromino.hold = () => {
@@ -801,6 +796,7 @@ const sketch = (s) => {
                 restart_grace_period_timeout(grace_period_handler)
                 break;
             case s.DOWN_ARROW:
+                check_fast_drop = true;
                 if (board.will_collision_down(current_tetromino)) break;
                 current_tetromino.move_down();
                 restart_grace_period_timeout(grace_period_handler)
