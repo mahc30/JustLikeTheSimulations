@@ -879,8 +879,8 @@ const sketch = (s) => {
                     Tetromino.hold()
             } else {
                 //Swipe down
-                if (!board.will_collision_rotate_right())
-                    current_tetromino.rotate_90_right();
+                board.hard_drop();
+                skip_grace_period()
             }
         }
         /* reset values */
