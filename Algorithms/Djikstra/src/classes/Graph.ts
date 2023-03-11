@@ -1,8 +1,8 @@
 import { format } from "util";
 import { Queue } from "../helpers/queue";
 
-export class DNode<T> {
-    private adjacent: DNode<T>[] = [];
+export class Node<T> {
+    private adjacent: Node<T>[] = [];
     private key: T;
     private data: T | undefined;
 
@@ -24,7 +24,7 @@ export class DNode<T> {
         this.key = key;
     }
 
-    getAdjacent(): DNode<T>[] {
+    getAdjacent(): Node<T>[] {
         return this.adjacent;
     }
 
@@ -34,11 +34,11 @@ export class DNode<T> {
         if (typeof data !== undefined) this.data = data;
     }
 
-    addAdjacent(node: DNode<T>): void {
+    addAdjacent(node: Node<T>): void {
         this.adjacent.push(node);
     }
 
-    removeAdjacent(key: T): DNode<T> | null {
+    removeAdjacent(key: T): Node<T> | null {
         const index = this.adjacent.findIndex(
             (node) => this.comparator(node.getKey(), key) === 0
         );
@@ -50,7 +50,7 @@ export class DNode<T> {
 }
 
 export class Graph<T> {
-    nodes: Map<T, DNode<T>> = new Map();
+    private nodes: Map<T, Node<T>> = new Map();
     comparator: (a: T, b: T) => number;
     constructor(comparator: (a: T, b: T) => number) {
         this.comparator = comparator;
@@ -60,13 +60,13 @@ export class Graph<T> {
      * Add a new node if it was not added before
      *
      * @param {T} key
-     * @returns {DNode<T>}
+     * @returns {Node<T>}
      */
-    addDNode(key: T, data?: T): DNode<T> {
+    addNode(key: T, data?: T): Node<T> {
         let node = this.nodes.get(key);
         if (node) return node;
 
-        node = new DNode(this.comparator, key, data);
+        node = new Node(this.comparator, key, data);
         this.nodes.set(key, node);
         return node;
     }
@@ -74,9 +74,9 @@ export class Graph<T> {
      * Remove a node, also remove it from other nodes adjacency list
      *
      * @param {T} key
-     * @returns {DNode<T> | null}
+     * @returns {Node<T> | null}
      */
-    removeDNode(key: T): DNode<T> | null {
+    removeNode(key: T): Node<T> | null {
         const nodeToRemove = this.nodes.get(key);
         if (!nodeToRemove) return null;
 
@@ -95,9 +95,9 @@ export class Graph<T> {
      */
 
     addEdge(source: T, destination: T): void {
-        const sourceDNode = this.addDNode(source);
-        const destinationDNode = this.addDNode(destination);
-        sourceDNode.addAdjacent(destinationDNode);
+        const sourceNode = this.addNode(source);
+        const destinationNode = this.addNode(destination);
+        sourceNode.addAdjacent(destinationNode);
     }
 
     /**
@@ -107,10 +107,10 @@ export class Graph<T> {
      * @param {T} destination
      */
     removeEdge(source: T, destination: T): void {
-        const sourceDNode = this.nodes.get(source);
-        const destinationDNode = this.nodes.get(destination);
-        if (sourceDNode && destinationDNode) {
-            sourceDNode.removeAdjacent(destination);
+        const sourceNode = this.nodes.get(source);
+        const destinationNode = this.nodes.get(destination);
+        if (sourceNode && destinationNode) {
+            sourceNode.removeAdjacent(destination);
         }
     }
 
@@ -122,7 +122,7 @@ export class Graph<T> {
      * @returns
      */
 
-    private depthFirstSearchAux(node: DNode<T>, visited: Map<T, boolean>): void {
+    private depthFirstSearchAux(node: Node<T>, visited: Map<T, boolean>): void {
         if (!node) return;
         visited.set(node.getKey(), true);
 
@@ -150,20 +150,21 @@ export class Graph<T> {
      * @returns
      */
 
-    private breadthFirstSearchAux(node: DNode<T> | undefined, visited: Map<T, boolean>): void {
+    private breadthFirstSearchAux(node: Node<T> | undefined, visited: Map<T, boolean>): void {
         if (!node) return;
-        const queue: Queue<DNode<T>> = new Queue();
+        const queue: Queue<Node<T>> = new Queue();
         queue.push(node);
         visited.set(node.getKey(), true);
         while (!queue.isEmpty()) {
             node = queue.pop();
             if (!node) continue;
 
-            //console.log(format('(%d %s)', node.getKey(), node.getData()));
+            //console.log(format('(%d %s) ->', node.getKey(), node.getData()));
             console.log(node)
             node.getAdjacent().forEach((item) => {
                 if (!visited.has(item.getKey())) {
                     visited.set(item.getKey(), true);
+                    console.log(item.getKey())
                     queue.push(item);
                 }
             });
@@ -192,13 +193,13 @@ export class GraphFactory<T> {
 
     generateLinearGraph(): Graph<T> {
         let graph: Graph<T> = new Graph<T>(this.comparator);
-        let nodes: DNode<T>[] = [];
+        let nodes: Node<T>[] = [];
 
         let objectIterator = this.object.keys();
         let head = objectIterator.next();
 
         while (head.value) {
-            nodes.push(graph.addDNode(head.value, this.object.get(head.value)))
+            nodes.push(graph.addNode(head.value, this.object.get(head.value)))
             head = objectIterator.next();
         }
 
@@ -207,6 +208,27 @@ export class GraphFactory<T> {
             let current = nodes[i];
             graph.addEdge(last_node.getKey(), current.getKey())
             last_node = current;
+        }
+
+        return graph;
+    }
+
+    generateRandomGraph() : Graph<T>{
+        let graph: Graph<T> = new Graph<T>(this.comparator);
+        let nodes : Node<T>[] = []; 
+
+        let objectIterator = this.object.keys();
+        let head = objectIterator.next();
+
+        while (head.value) {
+            nodes.push(graph.addNode(head.value, this.object.get(head.value)))
+            head = objectIterator.next();
+        }
+
+        
+        for(let i = 0; i < nodes.length; i++){
+            let randNode = Math.floor(Math.random() * nodes.length);
+            graph.addEdge(nodes[i].getKey(), nodes[randNode].getKey())
         }
 
         return graph;
