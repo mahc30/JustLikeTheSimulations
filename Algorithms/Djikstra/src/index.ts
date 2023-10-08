@@ -1,4 +1,5 @@
 import { GraphFactory } from "./classes/Graph";
+import { DjikstraNodeData } from "./helpers/djikstraNodeData";
 import { Point } from "./helpers/point";
 //number comparator because keys are numbers...
 function comparator(a: number, b: number) {
@@ -6,7 +7,6 @@ function comparator(a: number, b: number) {
     if (a > b) return 1;
     return 0;
 }
-
 
 let map = new Map<number, string>([
     [1,"a"],
@@ -18,7 +18,6 @@ let map = new Map<number, string>([
 ]);
 
 let graphFactory = new GraphFactory<number>(comparator, map);
-console.log("======================================")
 
 let linearGraph = graphFactory.generateLinearGraph();
 //linearGraph.breadthFirstSearch();
@@ -28,22 +27,25 @@ let randomGraph = graphFactory.generateRandomGraph();
 //randomGraph.breadthFirstSearch();
 //console.log("======================================")
 
+let initialPoint = new Point(0,0);
+let finalPoint = new Point(1,3);
 let pointMap = new Map<Point, Object>([
-    [new Point(0,0), { cost: 1}],
-    [new Point(0,1), { cost: 1}],
-    [new Point(0,2), { cost: 1}],
-    [new Point(1,2), { cost: 1}],
-    [new Point(2,2), { cost: 1}],
-    [new Point(2,3), { cost: 1}]
+    [initialPoint, new DjikstraNodeData(1)],
+    [new Point(0,1), new DjikstraNodeData(1)],
+    [new Point(0,2), new DjikstraNodeData(1)],
+    [new Point(1,2), new DjikstraNodeData(1)],
+    [new Point(2,2), new DjikstraNodeData(1)],
+    [new Point(2,3), new DjikstraNodeData(1)],
+    [finalPoint, new DjikstraNodeData(1)]
 ]);
 
 let pointGraphFactory = new GraphFactory<Point>(Point.comparator, pointMap);
 
 let linearPointGraph = pointGraphFactory.generateLinearGraph();
-linearPointGraph.breadthFirstSearch();
-
+//linearPointGraph.breadthFirstSearch();
+linearPointGraph.djikstraPathFinding(initialPoint, finalPoint);
 //console.log("======================================")
-//let randomPointGraph = pointGraphFactory.generateRandomGraph();
-//randomPointGraph.breadthFirstSearch();
+let randomPointGraph = pointGraphFactory.generateRandomGraph();
+randomPointGraph.djikstraPathFinding(initialPoint, finalPoint)//randomPointGraph.breadthFirstSearch();
 //console.log("======================================")
 //randomPointGraph.depthFirstSearch();

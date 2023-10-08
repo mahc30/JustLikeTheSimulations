@@ -1,53 +1,7 @@
-import { format } from "util";
 import { Queue } from "../helpers/queue";
-
-export class Node<T> {
-    private adjacent: Node<T>[] = [];
-    private key: T;
-    private data: T | undefined;
-
-    comparator: (a: T, b: T) => number;
-
-    getData(): T | undefined {
-        return this.data;
-    }
-
-    setData(data: T): void {
-        this.data = data;
-    }
-
-    getKey(): T {
-        return this.key;
-    }
-
-    setKey(key: T): void {
-        this.key = key;
-    }
-
-    getAdjacent(): Node<T>[] {
-        return this.adjacent;
-    }
-
-    constructor(comparator: (a: T, b: T) => number, key: T,  data?: T) {
-        this.comparator = comparator;
-        this.key = key;
-        if (typeof data !== undefined) this.data = data;
-    }
-
-    addAdjacent(node: Node<T>): void {
-        this.adjacent.push(node);
-    }
-
-    removeAdjacent(key: T): Node<T> | null {
-        const index = this.adjacent.findIndex(
-            (node) => this.comparator(node.getKey(), key) === 0
-        );
-        if (index > -1) {
-            return this.adjacent.splice(index, 1)[0];
-        }
-        return null;
-    }
-}
+import { Node } from "../helpers/node";
+import { Point } from "../helpers/point";
+import { DjikstraNodeData } from "../helpers/djikstraNodeData";
 
 export class Graph<T> {
     private nodes: Map<T, Node<T>> = new Map();
@@ -161,11 +115,11 @@ export class Graph<T> {
 
             //console.log(format('(%d %s) ->', node.getKey(), node.getData()));
             console.log(node)
-            node.getAdjacent().forEach((item) => {
-                if (!visited.has(item.getKey())) {
-                    visited.set(item.getKey(), true);
-                    console.log(item.getKey())
-                    queue.push(item);
+
+            node.getAdjacent().forEach((neighborNode) => {
+                if (!visited.has(neighborNode.getKey())) {
+                    visited.set(neighborNode.getKey(), true);
+                    queue.push(neighborNode);
                 }
             });
         }
@@ -178,6 +132,48 @@ export class Graph<T> {
                 this.breadthFirstSearchAux(node, visited);
             }
         });
+    }
+
+    djikstraPathFinding(initialNodeKey: T, targetNodeKey: T) {
+        let initialNode = this.nodes.get(initialNodeKey);
+        if (initialNode === undefined) return;
+
+        let visited: Map<T, boolean> = new Map();
+        let initialNodeData: DjikstraNodeData = this.nodes.get(initialNodeKey)?.getData() as DjikstraNodeData;
+        initialNodeData.setTentativeDistance(0);
+
+        let currentPoint = initialNode.getKey() as Point;
+        const queue: Queue<Node<T>> = new Queue();
+        queue.push(initialNode);
+        visited.set(initialNodeKey, true);
+
+        while (!queue.isEmpty()) {
+            let currentNode = queue.pop();
+            if (!currentNode) continue;
+
+            currentNode.getAdjacent().forEach((neighborNode) => {
+                let neighborData = neighborNode.getData() as DjikstraNodeData;
+                if (!visited.has(neighborNode.getKey())) {
+                    queue.push(neighborNode)
+                    let neighborCost = neighborData.getCost();
+                    let neighborPoint = neighborNode.getKey() as Point;
+
+                    let currentDistance = Math.floor(Math.sqrt(Math.pow(currentPoint.getX(), 2) + Math.pow(currentPoint.getY(), 2)));;
+                    let neighborDistance = Math.sqrt(Math.pow(neighborPoint.getX(), 2) + Math.pow(neighborPoint.getY(), 2));;
+
+                    let relativeDistance = Math.abs(currentDistance - neighborDistance);
+
+                    let totalCost = currentDistance + neighborCost + relativeDistance;
+
+                    if (totalCost > neighborDistance) neighborData.setTentativeDistance(totalCost);
+
+                    console.log(queue.size())
+                    visited.set(neighborNode.getKey(), true);
+                    if(visited.has(targetNodeKey)) console.log("SE FINI")
+                    neighborNode.setData(neighborData as T);
+                }
+            });
+        }
     }
 }
 
@@ -204,7 +200,7 @@ export class GraphFactory<T> {
         }
 
         let last_node = nodes[0];
-        for(let i = 1; i < nodes.length; i++){
+        for (let i = 1; i < nodes.length; i++) {
             let current = nodes[i];
             graph.addEdge(last_node.getKey(), current.getKey())
             last_node = current;
@@ -213,9 +209,9 @@ export class GraphFactory<T> {
         return graph;
     }
 
-    generateRandomGraph() : Graph<T>{
+    generateRandomGraph(): Graph<T> {
         let graph: Graph<T> = new Graph<T>(this.comparator);
-        let nodes : Node<T>[] = []; 
+        let nodes: Node<T>[] = [];
 
         let objectIterator = this.object.keys();
         let head = objectIterator.next();
@@ -225,8 +221,8 @@ export class GraphFactory<T> {
             head = objectIterator.next();
         }
 
-        
-        for(let i = 0; i < nodes.length; i++){
+
+        for (let i = 0; i < nodes.length; i++) {
             let randNode = Math.floor(Math.random() * nodes.length);
             graph.addEdge(nodes[i].getKey(), nodes[randNode].getKey())
         }
