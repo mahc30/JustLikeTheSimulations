@@ -1,0 +1,10 @@
+#tetris_viewport {
+    height: 100%;
+    width: 100%;
+}
+
+
+#game_board {
+    width: 100%;
+    height: 100%;
+}
